@@ -1,14 +1,22 @@
-import { Button } from "flowbite-react";
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Sidebar from './components/Sidebar';
+import Home from './pages/Home';
+import About from './pages/About';
 
 function App(): JSX.Element {
-
+  
   return (
-    <>
-      <h1 className="text-3xl font-bold underline">
-        Hello world!
-      </h1>
-      <Button>Click me</Button>
-    </>
+    <Router>
+      <div className="flex flex-row h-screen overflow-hidden">
+        <Sidebar />
+        <div className="flex flex-col flex-1 ml-64 h-screen overflow-y-auto">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+          </Routes>
+        </div>
+      </div>
+    </Router>
   )
 }
 
