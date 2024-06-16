@@ -2,6 +2,8 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import { Seed } from './sequelize/seed/seed'
+import sequelize from './sequelize/db'
 
 function createWindow(): void {
   // Create the browser window.
@@ -49,8 +51,18 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
+  if (process.env.NODE_ENV === 'production') {
+    console.log('production mode')
+    //createTable(false)
+  } else if (process.env.NODE_ENV === 'development') {
+    // Sem o seed a tabela não é criada nem os modelos sincronizados
+    Seed()
+  }
+
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
+
+
 
   createWindow()
 
