@@ -1,5 +1,15 @@
 # gerped
 
+## Requisitos para um Sistema de Pedidos para Consultoria Acadêmica
+
+#### __Cadastro de Clientes:__ 
+- Permitir o cadastro de clientes.
+- Capturar informações como nome, email, telefone, curso e instituição de ensino.
+
+
+
+
+## 
 An Electron application with React and TypeScript
 
 ## Recommended IDE Setup
