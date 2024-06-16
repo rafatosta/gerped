@@ -1,8 +1,8 @@
 import { Model, DataTypes, Optional } from 'sequelize';
 import sequelize from '../db';
 
-interface ClientAttributes {
-  id: number;
+export interface ClientAttributes {
+  id?: number;
   name: string;
   phone?: string;
   course?: string;

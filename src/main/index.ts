@@ -3,7 +3,6 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { Seed } from './sequelize/seed/seed'
-import sequelize from './sequelize/db'
 import ClientDAO from './sequelize/dao/ClientDAO'
 
 function createWindow(): void {

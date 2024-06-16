@@ -5,7 +5,6 @@ class ClientDAO {
     static async findAll(searchText: string, page: number): Promise<Client[]> {
         const limit = 15;
         const offset = (page - 1) * limit;
-        const order = [['createdAt', 'DESC']]; // Ordenação do último registro adicionado ao primeiro
 
         let whereClause = {};
         if (searchText) {
@@ -20,9 +19,9 @@ class ClientDAO {
 
         return await Client.findAll({
             where: whereClause,
-            limit,
-            offset,
-            order,
+            limit: limit,
+            offset: offset,
+            order: [['createdAt', 'DESC']],
             raw: true
         });
     }
