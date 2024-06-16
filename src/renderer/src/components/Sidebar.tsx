@@ -1,24 +1,29 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Sidebar as Sbar } from 'flowbite-react'
+import favicon from '../assets/favicon.svg'
 
 const Sidebar: React.FC = () => {
-  return (
-    <div className="fixed top-0 left-0 w-64 h-full bg-gray-800 text-white flex flex-col">
-      <div className="p-4">
-        <h1 className="text-xl font-bold">Dashboard</h1>
-      </div>
-      <nav className="flex-1 overflow-y-auto">
-        <ul>
-          <li className="p-4 hover:bg-gray-700">
-            <Link to="/">Home</Link>
-          </li>
-          <li className="p-4 hover:bg-gray-700">
-            <Link to="/about">About</Link>
-          </li>
-        </ul>
-      </nav>
-    </div>
-  );
+    return (
+        <Sbar aria-label="Default sidebar" className="fixed">
+            <Sbar.Logo href="/" img={favicon} imgAlt="logo">
+                GerPed
+            </Sbar.Logo>
+            <Sbar.Items>
+                <Sbar.ItemGroup>
+                    <Sbar.Item as={Link} to="/">
+                        Início
+                    </Sbar.Item>
+                    <Sbar.Item as={Link} to="/client" >
+                        Clientes
+                    </Sbar.Item>
+                    <Sbar.Item href="/about">
+                        Sobre
+                    </Sbar.Item>
+                </Sbar.ItemGroup>
+            </Sbar.Items>
+        </Sbar>
+    );
 };
 
 export default Sidebar;
