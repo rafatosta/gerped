@@ -14,7 +14,7 @@ const Sidebar: React.FC = () => {
                     <Sbar.Item as={Link} to="/">
                         Início
                     </Sbar.Item>
-                    <Sbar.Item as={Link} to="/client" >
+                    <Sbar.Item as={Link} to="/clients" >
                         Clientes
                     </Sbar.Item>
                     <Sbar.Item href="/about">
