@@ -1,12 +1,48 @@
+import { Op } from 'sequelize';
 import Client from '../models/Client';
 
 class ClientDAO {
-    static async findAll(): Promise<Client[]> {
-        return await Client.findAll();
+    static async findAll(searchText: string, page: number): Promise<Client[]> {
+        const limit = 15;
+        const offset = (page - 1) * limit;
+        const order = [['createdAt', 'DESC']]; // Ordenação do último registro adicionado ao primeiro
+
+        let whereClause = {};
+        if (searchText) {
+            whereClause = {
+                [Op.or]: [
+                    { name: { [Op.like]: `%${searchText}%` } },
+                    { phone: { [Op.like]: `%${searchText}%` } },
+                    { course: { [Op.like]: `%${searchText}%` } },
+                ],
+            };
+        }
+
+        return await Client.findAll({
+            where: whereClause,
+            limit,
+            offset,
+            order,
+            raw: true
+        });
     }
 
     static async findById(id: number): Promise<Client | null> {
         return await Client.findByPk(id);
+    }
+
+    static async count(searchText: string): Promise<number> {
+        let whereClause = {};
+        if (searchText) {
+            whereClause = {
+                [Op.or]: [
+                    { name: { [Op.like]: `%${searchText}%` } },
+                    { phone: { [Op.like]: `%${searchText}%` } },
+                    { course: { [Op.like]: `%${searchText}%` } },
+                ],
+            };
+        }
+        return Client.count({ where: whereClause });
     }
 
     static async create(data: Partial<Client>): Promise<Client> {

@@ -4,6 +4,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { Seed } from './sequelize/seed/seed'
 import sequelize from './sequelize/db'
+import ClientDAO from './sequelize/dao/ClientDAO'
 
 function createWindow(): void {
   // Create the browser window.
@@ -59,8 +60,14 @@ app.whenReady().then(() => {
     Seed()
   }
 
-  // IPC test
-  ipcMain.on('ping', () => console.log('pong'))
+  /* clients */
+  ipcMain.handle('client:findAll', async (_, searchText, page) => {
+    return ClientDAO.findAll(searchText, page)
+  })
+
+  ipcMain.handle('client:count', async (_, searchText) => {
+    return ClientDAO.count(searchText)
+  })
 
 
 
