@@ -1,7 +1,7 @@
 import Client from '@backend/models/Client';
 import { useCallback, useEffect, useState } from 'react';
 
-function findAllFromIPC(searchText: string, currentPage: number): Promise<Client[]> {
+function findAllFromIPC(searchText: string, currentPage: number): Promise<{ clients: Client[], count: number }> {
   return window.electron.ipcRenderer.invoke('client:findAll', searchText, currentPage);
 }
 
@@ -9,13 +9,14 @@ function findByIdFromIPC(id: string): Promise<Client> {
   return window.electron.ipcRenderer.invoke('client:findById', id);
 }
 
-function countFromIPC(searchText: string): Promise<number> {
-  return window.electron.ipcRenderer.invoke('client:count', searchText);
-}
-
 function saveFromIPC(client: Client): Promise<Client> {
   return window.electron.ipcRenderer.invoke('client:save', client);
 }
+
+function deleteFromIPC(id: number): Promise<Client> {
+  return window.electron.ipcRenderer.invoke('client:delete', id);
+}
+
 
 export function useClient(searchText: string = "", currentPage?: number) {
   const [clients, setClients] = useState<Client[]>([]);
@@ -24,11 +25,10 @@ export function useClient(searchText: string = "", currentPage?: number) {
   const fetchClients = useCallback(async () => {
     if (currentPage !== undefined) {
       try {
-        const count = await countFromIPC(searchText);
-        const data = await findAllFromIPC(searchText, currentPage);
+        const { clients, count } = await findAllFromIPC(searchText, currentPage);
 
         setTotalRecords(count);
-        setClients(data);
+        setClients(clients);
 
       } catch (err) {
         console.log('Erro:', err);
@@ -57,11 +57,23 @@ export function useClient(searchText: string = "", currentPage?: number) {
     return {} as Client;
   }, []);
 
+  const deleteClient = useCallback(async (id: number): Promise<Client> => {
+    try {
+      const delCliente = await deleteFromIPC(id);
+      fetchClients();
+      return delCliente;
+    } catch (err) {
+      alert(`Erro: ${err}}`);
+
+    }
+    return {} as Client;
+  }, []);
+
   useEffect(() => {
     if (currentPage !== undefined) {
       fetchClients();
     }
   }, [fetchClients, searchText, currentPage]);
 
-  return { clients, totalRecords, saveClient, findByIdClient };
+  return { clients, totalRecords, saveClient, findByIdClient, deleteClient };
 }

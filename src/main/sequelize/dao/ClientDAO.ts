@@ -2,7 +2,7 @@ import { Op } from 'sequelize';
 import Client from '../models/Client';
 
 class ClientDAO {
-    static async findAll(searchText: string, page: number): Promise<Client[]> {
+    static async findAll(searchText: string, page: number): Promise<{ clients: Client[], count: number }> {
         const limit = 15;
         const offset = (page - 1) * limit;
 
@@ -17,48 +17,38 @@ class ClientDAO {
             };
         }
 
-        return await Client.findAll({
-            where: whereClause,
-            limit: limit,
-            offset: offset,
-            order: [['createdAt', 'DESC']],
-            raw: true
-        });
+        const [clients, count] = await Promise.all([
+            Client.findAll({
+                where: whereClause,
+                limit: limit,
+                offset: offset,
+                order: [['createdAt', 'DESC']],
+                raw: true
+            }),
+            Client.count({ where: whereClause })
+        ]);
+
+        return { clients, count };
     }
 
     static async findById(id: number): Promise<Client | null> {
-        return await Client.findByPk(id, { raw: true});
-    }
-
-    static async count(searchText: string): Promise<number> {
-        let whereClause = {};
-        if (searchText) {
-            whereClause = {
-                [Op.or]: [
-                    { name: { [Op.like]: `%${searchText}%` } },
-                    { phone: { [Op.like]: `%${searchText}%` } },
-                    { course: { [Op.like]: `%${searchText}%` } },
-                ],
-            };
-        }
-        return Client.count({ where: whereClause });
+        return await Client.findByPk(id, { raw: true });
     }
 
     static async save(data: Client): Promise<Client | null> {
         if (data.id) {
-          await ClientDAO.update(data.id, data);
-          return Client.findByPk(data.id);
-        } else {
-          const newCliente = await ClientDAO.create(data);
-          return newCliente;
+            await ClientDAO.update(data.id, data);
+            return ClientDAO.findById(data.id);
         }
-      }
 
-    static async create(data: Client): Promise<Client> {
-        return await Client.create(data, {raw:true});
+        return await ClientDAO.create(data);
     }
 
-    static async update(id: number, data: Client): Promise<[number, Client[]]> {
+    static async create(data: Client): Promise<Client> {
+        return await Client.create(data, { raw: true });
+    }
+
+    static async update(id: number, data: Partial<Client>): Promise<[number]> {
         return await Client.update(data, { where: { id } });
     }
 

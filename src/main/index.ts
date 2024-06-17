@@ -68,12 +68,12 @@ app.whenReady().then(() => {
     return ClientDAO.findById(id)
   })
 
-  ipcMain.handle('client:count', async (_, searchText) => {
-    return ClientDAO.count(searchText)
-  })
-
   ipcMain.handle('client:save', async (_, client) => {
     return ClientDAO.save(client)
+  })
+
+  ipcMain.handle('client:delete', async (_, id) => {
+    return ClientDAO.delete(id)
   })
 
 

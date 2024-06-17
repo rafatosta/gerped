@@ -3,6 +3,7 @@ import Sidebar from './components/Sidebar';
 import Home from './pages/Home';
 import About from './pages/About';
 import Clients from './pages/Clients';
+import ClientDetails from './pages/ClientDetails';
 
 function App(): JSX.Element {
   
@@ -14,6 +15,7 @@ function App(): JSX.Element {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/clients" element={<Clients />} />
+            <Route path="/clients/:id" element={<ClientDetails />} />
             <Route path="/about" element={<About />} />
           </Routes>
         </div>
