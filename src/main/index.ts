@@ -64,6 +64,10 @@ app.whenReady().then(() => {
     return ClientDAO.findAll(searchText, page)
   })
 
+  ipcMain.handle('client:findById', async (_, id) => {
+    return ClientDAO.findById(id)
+  })
+
   ipcMain.handle('client:count', async (_, searchText) => {
     return ClientDAO.count(searchText)
   })

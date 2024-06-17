@@ -27,7 +27,7 @@ class ClientDAO {
     }
 
     static async findById(id: number): Promise<Client | null> {
-        return await Client.findByPk(id);
+        return await Client.findByPk(id, { raw: true});
     }
 
     static async count(searchText: string): Promise<number> {
