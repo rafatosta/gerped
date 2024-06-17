@@ -1,79 +1,82 @@
-import Client from '@backend/models/Client';
-import { useCallback, useEffect, useState } from 'react';
+import Client from '@backend/models/Client'
+import { useCallback, useEffect, useState } from 'react'
 
-function findAllFromIPC(searchText: string, currentPage: number): Promise<{ clients: Client[], count: number }> {
-  return window.electron.ipcRenderer.invoke('client:findAll', searchText, currentPage);
+function findAllFromIPC(
+  searchText: string,
+  currentPage: number
+): Promise<{ clients: Client[]; count: number }> {
+  return window.electron.ipcRenderer.invoke('client:findAll', searchText, currentPage)
 }
 
 function findByIdFromIPC(id: string): Promise<Client> {
-  return window.electron.ipcRenderer.invoke('client:findById', id);
+  return window.electron.ipcRenderer.invoke('client:findById', id)
 }
 
 function saveFromIPC(client: Client): Promise<Client> {
-  return window.electron.ipcRenderer.invoke('client:save', client);
+  return window.electron.ipcRenderer.invoke('client:save', client)
 }
 
 function deleteFromIPC(id: number): Promise<Client> {
-  return window.electron.ipcRenderer.invoke('client:delete', id);
+  return window.electron.ipcRenderer.invoke('client:delete', id)
 }
 
-
-export function useClient(searchText: string = "", currentPage?: number) {
-  const [clients, setClients] = useState<Client[]>([]);
-  const [totalRecords, setTotalRecords] = useState<number>(0);
+export function useClient(searchText: string = '', currentPage?: number) {
+  const [clients, setClients] = useState<Client[]>([])
+  const [totalRecords, setTotalRecords] = useState<number>(0)
 
   const fetchClients = useCallback(async () => {
     if (currentPage !== undefined) {
       try {
-        const { clients, count } = await findAllFromIPC(searchText, currentPage);
+        const { clients, count } = await findAllFromIPC(searchText, currentPage)
 
-        setTotalRecords(count);
-        setClients(clients);
-
+        setTotalRecords(count)
+        setClients(clients)
       } catch (err) {
-        console.log('Erro:', err);
+        console.log('Erro:', err)
       }
     }
-  }, [searchText, currentPage]);
+  }, [searchText, currentPage])
 
-  const saveClient = useCallback(async (client: Client): Promise<Client> => {
-    try {
-      const novoCliente = await saveFromIPC(client);
-      fetchClients();
-      return novoCliente;
-    } catch (err) {
-      alert(`Erro: ${err}}`);
-    }
+  const saveClient = useCallback(
+    async (client: Client): Promise<Client> => {
+      try {
+        const novoCliente = await saveFromIPC(client)
+        fetchClients()
+        return novoCliente
+      } catch (err) {
+        alert(`Erro: ${err}}`)
+      }
 
-    return {} as Client;
-  }, [fetchClients]);
+      return {} as Client
+    },
+    [fetchClients]
+  )
 
   const findByIdClient = useCallback(async (id: string): Promise<Client> => {
     try {
-      return await findByIdFromIPC(id);
+      return await findByIdFromIPC(id)
     } catch (err) {
-      alert(`Erro: ${err}}`);
+      alert(`Erro: ${err}}`)
     }
-    return {} as Client;
-  }, []);
+    return {} as Client
+  }, [])
 
   const deleteClient = useCallback(async (id: number): Promise<Client> => {
     try {
-      const delCliente = await deleteFromIPC(id);
-      fetchClients();
-      return delCliente;
+      const delCliente = await deleteFromIPC(id)
+      fetchClients()
+      return delCliente
     } catch (err) {
-      alert(`Erro: ${err}}`);
-
+      alert(`Erro: ${err}}`)
     }
-    return {} as Client;
-  }, []);
+    return {} as Client
+  }, [])
 
   useEffect(() => {
     if (currentPage !== undefined) {
-      fetchClients();
+      fetchClients()
     }
-  }, [fetchClients, searchText, currentPage]);
+  }, [fetchClients, searchText, currentPage])
 
-  return { clients, totalRecords, saveClient, findByIdClient, deleteClient };
+  return { clients, totalRecords, saveClient, findByIdClient, deleteClient }
 }

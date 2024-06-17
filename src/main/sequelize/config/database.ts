@@ -7,7 +7,7 @@ export default {
     database: 'database_development',
     host: '127.0.0.1',
     dialect: 'sqlite',
-    storage: './gerped-dev.sqlite',
+    storage: './gerped-dev.sqlite'
   },
   production: {
     username: 'root',
@@ -15,6 +15,6 @@ export default {
     database: 'database_production',
     host: '127.0.0.1',
     dialect: 'sqlite',
-    storage: './gerped.sqlite',
-  },
-};
+    storage: './gerped.sqlite'
+  }
+}

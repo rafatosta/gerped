@@ -76,8 +76,6 @@ app.whenReady().then(() => {
     return ClientDAO.delete(id)
   })
 
-
-
   createWindow()
 
   app.on('activate', function () {

@@ -1,12 +1,11 @@
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Sidebar from './components/Sidebar';
-import Home from './pages/Home';
-import About from './pages/About';
-import Clients from './pages/Clients';
-import ClientDetails from './pages/ClientDetails';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
+import Sidebar from './components/Sidebar'
+import Home from './pages/Home'
+import About from './pages/About'
+import Clients from './pages/Clients'
+import ClientDetails from './pages/ClientDetails'
 
 function App(): JSX.Element {
-  
   return (
     <Router>
       <div className="flex flex-row h-screen overflow-hidden">

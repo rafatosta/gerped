@@ -1,5 +1,5 @@
-import React from 'react';
-import Container from '../components/Container';
+import React from 'react'
+import Container from '../components/Container'
 
 const Home: React.FC = () => {
   return (
@@ -8,7 +8,7 @@ const Home: React.FC = () => {
       <p>Welcome to the home page!</p>
       <div className="h-96 bg-gray-200 mt-4">Long content here to demonstrate scrolling...</div>
     </Container>
-  );
-};
+  )
+}
 
-export default Home;
+export default Home
