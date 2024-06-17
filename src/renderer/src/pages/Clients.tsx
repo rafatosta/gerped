@@ -8,6 +8,7 @@ import { useClient } from "@renderer/hooks/useClient";
 import { formatPhoneNumber } from "@renderer/utils/formatPhoneNumber";
 import { TextInput } from "flowbite-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 function Clients() {
 
@@ -19,11 +20,20 @@ function Clients() {
     const onPageChange = (page: number) => setCurrentPage(page);
     const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => setSearchText(event.target.value);
 
+
     const columns = [
-        { header: "Nome", accessor: (client: Client) => client.name, className: 'whitespace-nowrap font-medium text-gray-900' },
-        { header: "Telefone", accessor: (client: Client) => formatPhoneNumber(client.phone) },
-        { header: "Curso", accessor: (client: Client) => client.course },
-    ];
+        { header: "Nome", accessor: (client: Client) => client.name, className: "whitespace-nowrap font-medium text-gray-900" },
+        { header: "Telefone", accessor: (client: Client) => formatPhoneNumber(client.phone), className: "" },
+        { header: "Curso", accessor: (client: Client) => client.course, className: "" },
+        { header: "Ações", accessor: (client: Client) => (
+            <Link
+              to={`/clients/${client.id}`}
+              className="font-medium text-cyan-600 hover:underline"
+            >
+              Visualizar
+            </Link>
+          ), className: "" }
+      ];
 
     return (
         <Container>

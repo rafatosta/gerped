@@ -1,10 +1,9 @@
 import { Table } from "flowbite-react";
-import { Link } from "react-router-dom";
 
 interface Column<T> {
     header: string;
     accessor: (item: T) => React.ReactNode;
-    className?: string
+    className?: string;
 }
 
 interface GenericTableProps<T> {
@@ -21,9 +20,6 @@ function GenericTable<T>({ data, columns, keyExtractor }: GenericTableProps<T>) 
                     {columns.map((column, index) => (
                         <Table.HeadCell key={index}>{column.header}</Table.HeadCell>
                     ))}
-                    <Table.HeadCell>
-                        <span className="sr-only">Visualizar</span>
-                    </Table.HeadCell>
                 </Table.Head>
                 <Table.Body className="divide-y overflow-y-auto">
                     {data.map((item) => (
@@ -33,14 +29,6 @@ function GenericTable<T>({ data, columns, keyExtractor }: GenericTableProps<T>) 
                                     {column.accessor(item)}
                                 </Table.Cell>
                             ))}
-                            <Table.Cell>
-                                <Link
-                                    to={`/cliente/${keyExtractor(item)}`}
-                                    className="font-medium text-cyan-600 hover:underline"
-                                >
-                                    Visualizar
-                                </Link>
-                            </Table.Cell>
                         </Table.Row>
                     ))}
                 </Table.Body>
