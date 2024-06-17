@@ -12,7 +12,12 @@ function ClientFormModal({ saveCliente }: IClienteFormDialog) {
     const [openModal, setOpenModal] = useState(false);
     const nameInputRef = useRef<HTMLInputElement>(null);
 
-    const [client, setClient] = useState<Client>({} as Client)
+    const [client, setClient] = useState<Client>({
+        name: "",
+        phone: "",
+        course: "",
+        institute: ""
+    });
 
     const navigate = useNavigate();
 
@@ -46,7 +51,12 @@ function ClientFormModal({ saveCliente }: IClienteFormDialog) {
 
     const onCloseModal = () => {
         setOpenModal(false)
-        setClient({} as Client)
+        setClient({
+            name: "",
+            phone: "",
+            course: "",
+            institute: ""
+        } as Client);
     }
 
     return (
@@ -63,7 +73,7 @@ function ClientFormModal({ saveCliente }: IClienteFormDialog) {
                             onChange={handleInputChange('name')}
                             ref={nameInputRef}
                             required />
-
+                        
                         <InputMask
                             mask="(99) 99999-9999"
                             value={client.phone}
@@ -79,18 +89,18 @@ function ClientFormModal({ saveCliente }: IClienteFormDialog) {
                         </InputMask>
 
                         <FloatingLabel variant="filled"
-                            label="Curso"
+                            label="Curso (Opicional)"
                             type="text"
                             value={client.course}
                             onChange={handleInputChange('course')}
-                            required />
+                            />
 
                         <FloatingLabel variant="filled"
-                            label="Instituto"
+                            label="Instituto (Opicional)"
                             type="text"
                             value={client.institute}
                             onChange={handleInputChange('institute')}
-                            required />
+                            />
 
                         <Modal.Footer className="flex flex-row justify-between items-center">
                             <Button
@@ -117,4 +127,3 @@ function ClientFormModal({ saveCliente }: IClienteFormDialog) {
 }
 
 export default ClientFormModal;
-
