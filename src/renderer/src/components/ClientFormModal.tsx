@@ -98,7 +98,7 @@ function ClientFormModal({ saveCliente }: IClienteFormDialog) {
                   variant="filled"
                   className="col-span-2"
                   label="Email (Opicional)"
-                  type="text"
+                  type="email"
                   value={client.email}
                   onChange={handleInputChange('email')}
                 />
