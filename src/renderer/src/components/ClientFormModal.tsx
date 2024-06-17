@@ -15,9 +15,10 @@ function ClientFormModal({ saveCliente }: IClienteFormDialog) {
     const [client, setClient] = useState<Client>({
         name: "",
         phone: "",
+        email: "",
         course: "",
         institute: ""
-    });
+    } as Client);
 
     const navigate = useNavigate();
 
@@ -73,34 +74,48 @@ function ClientFormModal({ saveCliente }: IClienteFormDialog) {
                             onChange={handleInputChange('name')}
                             ref={nameInputRef}
                             required />
-                        
-                        <InputMask
-                            mask="(99) 99999-9999"
-                            value={client.phone}
-                            onChange={handleInputChange('phone')}
-                        >
-                            {(inputProps: any) => (
+
+                        <div className="grid grid-cols-3 gap-4">
+                            <InputMask
+                                mask="(99) 99999-9999"
+                                value={client.phone}
+                                onChange={handleInputChange('phone')}
+                            >
+                                {(inputProps: any) => (
+                                    <FloatingLabel variant="filled"
+                                        {...inputProps}
+
+                                        label="Telefone"
+                                        value={client.phone}
+                                        required />
+                                )}
+                            </InputMask>
+                            <div className="col-span-2">
                                 <FloatingLabel variant="filled"
-                                    {...inputProps}
-                                    label="Telefone"
-                                    value={client.phone}
-                                    required />
-                            )}
-                        </InputMask>
+                                    className="col-span-2"
+                                    label="Email (Opicional)"
+                                    type="text"
+                                    value={client.email}
+                                    onChange={handleInputChange('email')}
+                                />
+                            </div>
+
+                        </div>
+
 
                         <FloatingLabel variant="filled"
                             label="Curso (Opicional)"
                             type="text"
                             value={client.course}
                             onChange={handleInputChange('course')}
-                            />
+                        />
 
                         <FloatingLabel variant="filled"
                             label="Instituto (Opicional)"
                             type="text"
                             value={client.institute}
                             onChange={handleInputChange('institute')}
-                            />
+                        />
 
                         <Modal.Footer className="flex flex-row justify-between items-center">
                             <Button
