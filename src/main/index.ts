@@ -68,6 +68,10 @@ app.whenReady().then(() => {
     return ClientDAO.count(searchText)
   })
 
+  ipcMain.handle('client:save', async (_, client) => {
+    return ClientDAO.save(client)
+  })
+
 
 
   createWindow()

@@ -1,12 +1,12 @@
 import Client from "@backend/models/Client";
-import ClientsTable from "@renderer/components/ClientsTable";
+import ClientFormModal from "@renderer/components/ClientFormModal";
 import Container from "@renderer/components/Container";
 import GenericTable from "@renderer/components/GenericTable";
 import PaginationControls from "@renderer/components/PaginationControls";
 import Title from "@renderer/components/Title";
 import { useClient } from "@renderer/hooks/useClient";
 import { formatPhoneNumber } from "@renderer/utils/formatPhoneNumber";
-import { Button, TextInput } from "flowbite-react";
+import { TextInput } from "flowbite-react";
 import { useState } from "react";
 
 function Clients() {
@@ -14,7 +14,7 @@ function Clients() {
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [searchText, setSearchText] = useState<string>('');
 
-    const { clients, totalRecords } = useClient(searchText, currentPage);
+    const { clients, totalRecords, saveClient } = useClient(searchText, currentPage);
 
     const onPageChange = (page: number) => setCurrentPage(page);
     const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => setSearchText(event.target.value);
@@ -37,7 +37,7 @@ function Clients() {
                     value={searchText}
                     onChange={handleSearch}
                 />
-                <Button>Novo</Button>
+                <ClientFormModal saveCliente={saveClient} />
             </div>
             {/* <ClientsTable clients={clients} /> */}
             <GenericTable

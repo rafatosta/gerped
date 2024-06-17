@@ -25,6 +25,7 @@
     "@electron-toolkit/utils": "^3.0.0",
     "electron-updater": "^6.1.7",
     "flowbite-react": "^0.9.0",
+    "react-input-mask": "^2.0.4",
     "react-router-dom": "^6.23.1",
     "sequelize": "^6.37.3",
     "sqlite3": "^5.1.7"

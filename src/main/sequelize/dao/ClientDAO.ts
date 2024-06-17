@@ -44,11 +44,21 @@ class ClientDAO {
         return Client.count({ where: whereClause });
     }
 
-    static async create(data: Partial<Client>): Promise<Client> {
-        return await Client.create(data);
+    static async save(data: Client): Promise<Client | null> {
+        if (data.id) {
+          await ClientDAO.update(data.id, data);
+          return Client.findByPk(data.id);
+        } else {
+          const newCliente = await ClientDAO.create(data);
+          return newCliente;
+        }
+      }
+
+    static async create(data: Client): Promise<Client> {
+        return await Client.create(data, {raw:true});
     }
 
-    static async update(id: number, data: Partial<Client>): Promise<[number, Client[]]> {
+    static async update(id: number, data: Client): Promise<[number, Client[]]> {
         return await Client.update(data, { where: { id } });
     }
 
