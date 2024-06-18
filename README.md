@@ -2,10 +2,14 @@
 
 ## Requisitos para um Sistema de Pedidos para Consultoria Acadêmica
 
-#### __Cadastro de Clientes:__ 
+#### Cadastro de Clientes
 - Permitir o cadastro de clientes.
 - Capturar informações como nome, email, telefone, curso e instituição de ensino.
 
+
+#### Gestão de Pedidos
+- Permitir criação de pedidos de consultoria por cliente.
+- Capturar detalhes do pedido: tipo de serviço (orientação acadêmica, revisão de artigo, etc.), área de estudo, descrição detalhada, prazo desejado.
 
 
 

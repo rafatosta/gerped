@@ -4,6 +4,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { Seed } from './sequelize/seed/seed'
 import ClientDAO from './sequelize/dao/ClientDAO'
+import ServiceDAO from './sequelize/dao/ServiceDAO'
 
 function createWindow(): void {
   // Create the browser window.
@@ -74,6 +75,23 @@ app.whenReady().then(() => {
 
   ipcMain.handle('client:delete', async (_, id) => {
     return ClientDAO.delete(id)
+  })
+
+  /* Services */
+  ipcMain.handle('service:findAll', async (_, searchText, page) => {
+    return ServiceDAO.findAll(searchText, page)
+  })
+
+  ipcMain.handle('service:findById', async (_, id) => {
+    return ServiceDAO.findById(id)
+  })
+
+  ipcMain.handle('service:save', async (_, client) => {
+    return ServiceDAO.save(client)
+  })
+
+  ipcMain.handle('service:delete', async (_, id) => {
+    return ServiceDAO.delete(id)
   })
 
   createWindow()
