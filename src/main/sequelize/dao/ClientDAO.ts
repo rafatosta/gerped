@@ -5,7 +5,7 @@ class ClientDAO {
   static async findAll(
     searchText: string,
     page: number
-  ): Promise<{ clients: Client[]; count: number }> {
+  ): Promise<{ data: Client[]; count: number }> {
     const limit = 15
     const offset = (page - 1) * limit
 
@@ -20,7 +20,7 @@ class ClientDAO {
       }
     }
 
-    const [clients, count] = await Promise.all([
+    const [data, count] = await Promise.all([
       Client.findAll({
         where: whereClause,
         limit: limit,
@@ -31,7 +31,7 @@ class ClientDAO {
       Client.count({ where: whereClause })
     ])
 
-    return { clients, count }
+    return { data, count }
   }
 
   static async findById(id: number): Promise<Client | null> {

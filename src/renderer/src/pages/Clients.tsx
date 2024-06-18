@@ -14,7 +14,7 @@ function Clients() {
   const [currentPage, setCurrentPage] = useState<number>(1)
   const [searchText, setSearchText] = useState<string>('')
 
-  const { clients, totalRecords, saveClient } = useClient(searchText, currentPage)
+  const { data, count, save } = useClient(searchText, currentPage)
 
   const onPageChange = (page: number) => setCurrentPage(page)
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) =>
@@ -23,23 +23,21 @@ function Clients() {
   const columns = [
     {
       header: 'Nome',
-      accessor: (client: Client) => client.name,
+      accessor: (data: Client) => data.name,
       className: 'whitespace-nowrap font-medium text-gray-900'
     },
     {
       header: 'Telefone',
-      accessor: (client: Client) => formatPhoneNumber(client.phone),
-      className: ''
+      accessor: (data: Client) => formatPhoneNumber(data.phone),
     },
-    { header: 'Curso', accessor: (client: Client) => client.course, className: '' },
+    { header: 'Curso', accessor: (data: Client) => data.course },
     {
       header: 'Ações',
-      accessor: (client: Client) => (
-        <Link to={`/clients/${client.id}`} className="font-medium text-cyan-600 hover:underline">
+      accessor: (data: Client) => (
+        <Link to={`/clients/${data.id}`} className="font-medium text-cyan-600 hover:underline">
           Visualizar
         </Link>
-      ),
-      className: ''
+      )
     }
   ]
 
@@ -54,13 +52,12 @@ function Clients() {
           value={searchText}
           onChange={handleSearch}
         />
-        <ClientFormModal saveCliente={saveClient} />
+        <ClientFormModal saveCliente={save} />
       </div>
-      {/* <ClientsTable clients={clients} /> */}
-      <GenericTable data={clients} columns={columns} keyExtractor={(client: Client) => client.id} />
+      <GenericTable data={data} columns={columns} keyExtractor={(data: Client) => data.id} />
       <PaginationControls
         currentPage={currentPage}
-        totalRecords={totalRecords}
+        totalRecords={count}
         onPageChange={onPageChange}
       />
     </Container>

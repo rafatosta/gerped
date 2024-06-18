@@ -1,11 +1,11 @@
 import Client from '@backend/models/Client'
-import { useCallback, useEffect, useState } from 'react'
+import { useBackendEntity } from './useBackendEntity';
 
 function findAllFromIPC(
   searchText: string,
   currentPage: number
-): Promise<{ clients: Client[]; count: number }> {
-  return window.electron.ipcRenderer.invoke('client:findAll', searchText, currentPage)
+): Promise<{ data: Client[]; count: number }> {
+  return window.electron.ipcRenderer.invoke('client:findAll', searchText, currentPage);
 }
 
 function findByIdFromIPC(id: string): Promise<Client> {
@@ -21,62 +21,13 @@ function deleteFromIPC(id: number): Promise<Client> {
 }
 
 export function useClient(searchText: string = '', currentPage?: number) {
-  const [clients, setClients] = useState<Client[]>([])
-  const [totalRecords, setTotalRecords] = useState<number>(0)
-
-  const fetchClients = useCallback(async () => {
-    if (currentPage !== undefined) {
-      try {
-        const { clients, count } = await findAllFromIPC(searchText, currentPage)
-
-        setTotalRecords(count)
-        setClients(clients)
-      } catch (err) {
-        console.log('Erro:', err)
-      }
-    }
-  }, [searchText, currentPage])
-
-  const saveClient = useCallback(
-    async (client: Client): Promise<Client> => {
-      try {
-        const novoCliente = await saveFromIPC(client)
-        fetchClients()
-        return novoCliente
-      } catch (err) {
-        alert(`Erro: ${err}}`)
-      }
-
-      return {} as Client
-    },
-    [fetchClients]
-  )
-
-  const findByIdClient = useCallback(async (id: string): Promise<Client> => {
-    try {
-      return await findByIdFromIPC(id)
-    } catch (err) {
-      alert(`Erro: ${err}}`)
-    }
-    return {} as Client
-  }, [])
-
-  const deleteClient = useCallback(async (id: number): Promise<Client> => {
-    try {
-      const delCliente = await deleteFromIPC(id)
-      fetchClients()
-      return delCliente
-    } catch (err) {
-      alert(`Erro: ${err}}`)
-    }
-    return {} as Client
-  }, [])
-
-  useEffect(() => {
-    if (currentPage !== undefined) {
-      fetchClients()
-    }
-  }, [fetchClients, searchText, currentPage])
-
-  return { clients, totalRecords, saveClient, findByIdClient, deleteClient }
+  
+  return useBackendEntity<Client>(
+    findAllFromIPC,
+    findByIdFromIPC,
+    saveFromIPC,
+    deleteFromIPC,
+    searchText,
+    currentPage
+  );
 }

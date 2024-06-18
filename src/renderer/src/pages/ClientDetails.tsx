@@ -22,13 +22,13 @@ function ClienteDetails() {
     institute: ''
   } as Client)
 
-  const { saveClient, findByIdClient, deleteClient } = useClient()
+  const { save, findById, remove } = useClient()
 
   useEffect(() => {
     const fetchData = async () => {
       if (id) {
         try {
-          const res = await findByIdClient(id)
+          const res = await findById(id)
           setClient(res)
         } catch (error) {
           console.error('Error fetching Cliente:', error)
@@ -54,24 +54,23 @@ function ClienteDetails() {
     async (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault()
       try {
-        await saveClient(client)
+        await save(client)
         setButtonUpEnable(true)
       } catch (error) {
         console.error('Error saving Cliente:', error)
       }
     },
-    [client, saveClient]
+    [client, save]
   )
 
   const handleDelete = useCallback(async () => {
     if (client.id) {
-      console.log('delete:', client.id, client)
-      await deleteClient(client.id)
+      await remove(client.id)
       navigate('/clients')
     } else {
       console.error('ID is undefined')
     }
-  }, [client.id, deleteClient, navigate])
+  }, [client.id, remove, navigate])
 
   return (
     <Container>
