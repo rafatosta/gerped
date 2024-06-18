@@ -4,6 +4,7 @@ import Home from './pages/Home'
 import About from './pages/About'
 import Clients from './pages/Clients'
 import ClientDetails from './pages/ClientDetails'
+import Services from './pages/Services'
 
 function App(): JSX.Element {
   return (
@@ -15,6 +16,7 @@ function App(): JSX.Element {
             <Route path="/" element={<Home />} />
             <Route path="/clients" element={<Clients />} />
             <Route path="/clients/:id" element={<ClientDetails />} />
+            <Route path="/services" element={<Services />} />
             <Route path="/about" element={<About />} />
           </Routes>
         </div>
