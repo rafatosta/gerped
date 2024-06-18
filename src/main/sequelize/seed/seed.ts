@@ -1,5 +1,6 @@
 import sequelize from '../db'
 import { seedClients } from './seedClients'
+import { seedOrders } from './seedOrders'
 import { seedServices } from './seedServices'
 
 export const Seed = async () => {
@@ -7,7 +8,7 @@ export const Seed = async () => {
     await limparTabelas() // Limpe todas as tabelas antes de adicionar os dados
 
     // Array de arquivos de seed
-    const seedFiles = [seedClients, seedServices]
+    const seedFiles = [seedClients, seedServices, seedOrders]
 
     // Execute cada arquivo de seed
     for (const seedFile of seedFiles) {
