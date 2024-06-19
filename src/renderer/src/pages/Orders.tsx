@@ -6,6 +6,7 @@ import GenericTable from "@renderer/components/GenericTable";
 import PaginationControls from "@renderer/components/PaginationControls";
 import Title from "@renderer/components/Title";
 import { useOrder } from "@renderer/hooks/useOrder";
+import formatDate from "@renderer/utils/formatDate";
 import { Badge, Button, Dropdown, FloatingLabel } from "flowbite-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -35,7 +36,7 @@ function Orders() {
         },
         {
             header: 'Entrega',
-            accessor: (data: Order) => `${data.deliveryDate}`
+            accessor: (data: Order) => formatDate(data.deliveryDate)
         },
         {
             header: 'Situação',

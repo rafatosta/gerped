@@ -10,6 +10,7 @@ import Container from '@renderer/components/Container'
 import GenericTable from '@renderer/components/GenericTable'
 import Order from '@backend/models/Order'
 import { OrderStatus } from '@backend/enums/OrderStatus'
+import formatDate from '@renderer/utils/formatDate'
 
 function ClienteDetails() {
   const { id } = useParams<{ id: string }>()
@@ -83,7 +84,7 @@ function ClienteDetails() {
     },
     {
       header: 'Entrega',
-      accessor: (data: Order) => `${data.deliveryDate.toDateString()}`
+      accessor: (data: Order) => formatDate(data.deliveryDate)
     },
     {
       header: 'Situação',
