@@ -40,6 +40,7 @@ class Order extends Model<OrderAttributes, OrderCreationAttributes> implements O
         // Define association here
         Order.belongsTo(Client, { foreignKey: 'idClient' });
         Order.belongsTo(Service, { foreignKey: 'idService' });
+        Client.hasMany(Order, { foreignKey: 'idClient' });
     }
 }
 
@@ -94,8 +95,6 @@ Order.init(
     }
 );
 
-
-// Call associate method
 Order.associate();
 
 export default Order;
