@@ -37,7 +37,7 @@ function Services() {
         return await save(service);
     };
 
-    const onCloseModal = ()=>{
+    const onCloseModal = () => {
         setIsModalOpen(false)
         setSelectedService(null)
     }
@@ -75,16 +75,18 @@ function Services() {
     return (
         <Container>
             <Title disabled>Serviços</Title>
-            <div className="grid grid-cols-2 items-center">
-                <FloatingLabel
-                    className="w-full"
-                    variant="standard"
-                    label="Buscar"
-                    type="text"
-                    value={searchText}
-                    onChange={handleSearch}
-                />
-                <div className="flex justify-end items-center">
+            <div className="grid grid-cols-3 items-start gap-x-4">
+                <div className="col-span-2">
+                    <FloatingLabel
+                        variant="standard"
+                        label="Buscar"
+                        type="text"
+                        value={searchText}
+                        onChange={handleSearch}
+                    />
+                </div>
+
+                <div className="flex justify-end">
                     <Button onClick={() => setIsModalOpen(true)}>Novo</Button>
                     <ServiceFormModal
                         isOpen={isModalOpen}
@@ -93,7 +95,6 @@ function Services() {
                         editMode={!!selectedService}
                         service={selectedService}
                     />
-
                 </div>
             </div>
             <GenericTable data={data} columns={columns} keyExtractor={(data: Service) => data.id} />

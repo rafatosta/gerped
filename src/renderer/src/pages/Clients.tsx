@@ -6,7 +6,7 @@ import PaginationControls from '@renderer/components/PaginationControls'
 import Title from '@renderer/components/Title'
 import { useClient } from '@renderer/hooks/useClient'
 import { formatPhoneNumber } from '@renderer/utils/formatPhoneNumber'
-import { TextInput } from 'flowbite-react'
+import { FloatingLabel, TextInput } from 'flowbite-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
@@ -45,14 +45,21 @@ function Clients() {
     <Container>
       <Title disabled>Clientes</Title>
 
-      <div className="flex justify-between items-center">
-        <TextInput
-          placeholder="Buscar..."
-          className="w-1/2"
-          value={searchText}
-          onChange={handleSearch}
-        />
-        <ClientFormModal saveCliente={save} />
+
+      <div className="grid grid-cols-3 items-start gap-x-4">
+        <div className="col-span-2">
+          <FloatingLabel
+            variant="standard"
+            label="Buscar"
+            type="text"
+            value={searchText}
+            onChange={handleSearch}
+          />
+        </div>
+
+        <div className="flex justify-end">
+          <ClientFormModal saveCliente={save} />
+        </div>
       </div>
       <GenericTable data={data} columns={columns} keyExtractor={(data: Client) => data.id} />
       <PaginationControls
