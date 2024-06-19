@@ -13,6 +13,8 @@ export interface OrderAttributes {
     deliveryDate: Date;
     price: number;
     status: OrderStatus;
+    Client: Client
+    Service: Service
 }
 
 interface OrderCreationAttributes extends Optional<OrderAttributes, 'id'> { }
@@ -26,10 +28,19 @@ class Order extends Model<OrderAttributes, OrderCreationAttributes> implements O
     public deliveryDate!: Date;
     public price!: number;
     public status!: OrderStatus;
+    public Client!: Client;
+    public Service!: Service
+
 
     // timestamps!
     public readonly createdAt!: Date;
     public readonly updatedAt!: Date;
+
+    public static associate() {
+        // Define association here
+        Order.belongsTo(Client, { foreignKey: 'idClient' });
+        Order.belongsTo(Service, { foreignKey: 'idService' });
+    }
 }
 
 Order.init(
@@ -84,6 +95,7 @@ Order.init(
 );
 
 
-
+// Call associate method
+Order.associate();
 
 export default Order;

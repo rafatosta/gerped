@@ -5,6 +5,7 @@ import icon from '../../resources/icon.png?asset'
 import { Seed } from './sequelize/seed/seed'
 import ClientDAO from './sequelize/dao/ClientDAO'
 import ServiceDAO from './sequelize/dao/ServiceDAO'
+import OrderDAO from './sequelize/dao/OrderDAO'
 
 function createWindow(): void {
   // Create the browser window.
@@ -69,8 +70,8 @@ app.whenReady().then(() => {
     return ClientDAO.findById(id)
   })
 
-  ipcMain.handle('client:save', async (_, client) => {
-    return ClientDAO.save(client)
+  ipcMain.handle('client:save', async (_, data) => {
+    return ClientDAO.save(data)
   })
 
   ipcMain.handle('client:delete', async (_, id) => {
@@ -86,12 +87,29 @@ app.whenReady().then(() => {
     return ServiceDAO.findById(id)
   })
 
-  ipcMain.handle('service:save', async (_, client) => {
-    return ServiceDAO.save(client)
+  ipcMain.handle('service:save', async (_, data) => {
+    return ServiceDAO.save(data)
   })
 
   ipcMain.handle('service:delete', async (_, id) => {
     return ServiceDAO.delete(id)
+  })
+
+  /* Orders */
+  ipcMain.handle('order:findAll', async (_, searchText, page) => {
+    return OrderDAO.findAll(searchText, page)
+  })
+
+  ipcMain.handle('order:findById', async (_, id) => {
+    return OrderDAO.findById(id)
+  })
+
+  ipcMain.handle('order:save', async (_, data) => {
+    return OrderDAO.save(data)
+  })
+
+  ipcMain.handle('order:delete', async (_, id) => {
+    return OrderDAO.delete(id)
   })
 
   createWindow()
