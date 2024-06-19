@@ -20,7 +20,7 @@ export interface OrderAttributes {
 interface OrderCreationAttributes extends Optional<OrderAttributes, 'id'> { }
 
 class Order extends Model<OrderAttributes, OrderCreationAttributes> implements OrderAttributes {
-    public id?: number;
+    public id!: number;
     public idClient!: number;
     public idService!: number;
     public theme!: string;
