@@ -96,8 +96,8 @@ app.whenReady().then(() => {
   })
 
   /* Orders */
-  ipcMain.handle('order:findAll', async (_, searchText, page) => {
-    return OrderDAO.findAll(searchText, page)
+  ipcMain.handle('order:findAll', async (_, searchText, page, filterStatus) => {
+    return OrderDAO.findAll(searchText, page, filterStatus)
   })
 
   ipcMain.handle('order:findById', async (_, id) => {

@@ -1,11 +1,13 @@
 import Order from '@backend/models/Order'
 import { useBackendEntity } from './useBackendEntity';
+import { OrderStatus } from '@backend/enums/OrderStatus';
 
 function findAllFromIPC(
   searchText: string,
-  currentPage: number
+  currentPage: number,
+  filterStatus: OrderStatus
 ): Promise<{ data: Order[]; count: number }> {
-  return window.electron.ipcRenderer.invoke('order:findAll', searchText, currentPage);
+  return window.electron.ipcRenderer.invoke('order:findAll', searchText, currentPage, filterStatus);
 }
 
 function findByIdFromIPC(id: string): Promise<Order> {
@@ -20,7 +22,7 @@ function deleteFromIPC(id: number): Promise<Order> {
   return window.electron.ipcRenderer.invoke('order:delete', id)
 }
 
-export function useOrder(searchText: string = '', currentPage?: number) {
+export function useOrder(searchText: string = '', currentPage?: number, filterStatus?: OrderStatus) {
   
   return useBackendEntity<Order>(
     findAllFromIPC,
@@ -28,6 +30,7 @@ export function useOrder(searchText: string = '', currentPage?: number) {
     saveFromIPC,
     deleteFromIPC,
     searchText,
-    currentPage
+    currentPage,
+    filterStatus //ExtraParams
   );
 }

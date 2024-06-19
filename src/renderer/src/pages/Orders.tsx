@@ -13,10 +13,10 @@ import { Link } from "react-router-dom";
 function Orders() {
     const [currentPage, setCurrentPage] = useState<number>(1)
     const [searchText, setSearchText] = useState<string>('')
-    const [statusSearch, setStatusSearch] = useState<OrderStatus>(OrderStatus.ATIVO);
+    const [filterStatus, setFilterStatus] = useState<OrderStatus>(OrderStatus.ATIVO);
 
 
-    const { data, count, save } = useOrder(searchText, statusSearch, currentPage)
+    const { data, count, save } = useOrder(searchText, currentPage, filterStatus)
 
     const onPageChange = (page: number) => setCurrentPage(page)
     const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) =>
@@ -71,10 +71,10 @@ function Orders() {
                 </div>
                 <div className="flex items-center gap-x-4">
                     <p>Filtrar por:</p>
-                    <Dropdown color="gray" label={statusSearch ? OrderStatus[statusSearch] : "TODOS"}>
-                        <Dropdown.Item onClick={() => setStatusSearch(OrderStatus.ATIVO)}>ATIVO</Dropdown.Item>
-                        <Dropdown.Item onClick={() => setStatusSearch(OrderStatus.FINALIZADO)}>FINALIZADO</Dropdown.Item>
-                        <Dropdown.Item onClick={() => setStatusSearch(OrderStatus.TODOS)}>TODOS</Dropdown.Item>
+                    <Dropdown color="gray" label={filterStatus ? OrderStatus[filterStatus] : "TODOS"}>
+                        <Dropdown.Item onClick={() => setFilterStatus(OrderStatus.ATIVO)}>ATIVO</Dropdown.Item>
+                        <Dropdown.Item onClick={() => setFilterStatus(OrderStatus.FINALIZADO)}>FINALIZADO</Dropdown.Item>
+                        <Dropdown.Item onClick={() => setFilterStatus(OrderStatus.TODOS)}>TODOS</Dropdown.Item>
                     </Dropdown>
                 </div>
                 <div className="flex justify-end">

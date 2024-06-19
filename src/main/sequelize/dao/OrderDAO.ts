@@ -2,16 +2,20 @@ import { Op } from 'sequelize'
 import Order from '../models/Order'
 import Service from '@backend/models/Service';
 import Client from '@backend/models/Client';
+import { OrderStatus } from '@backend/enums/OrderStatus';
 
 class OrderDAO {
   static async findAll(
     searchText: string,
-    page: number
+    page: number,
+    filterStatus: OrderStatus
   ): Promise<{ data: Order[]; count: number }> {
     const limit = 15
     const offset = (page - 1) * limit
 
-    let whereClause = {}
+    console.log(OrderStatus[filterStatus]);
+
+    let whereClause: any = {}
     if (searchText) {
       whereClause = {
         [Op.or]: [
@@ -19,6 +23,10 @@ class OrderDAO {
           { '$Client.name$': { [Op.like]: `%${searchText}%` } }
         ]
       }
+    }
+
+    if (filterStatus && filterStatus != OrderStatus.TODOS) {
+      whereClause.status = filterStatus;
     }
 
     const [data, count] = await Promise.all([
