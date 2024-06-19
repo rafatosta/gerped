@@ -16,7 +16,7 @@ class OrderDAO {
       whereClause = {
         [Op.or]: [
           { theme: { [Op.like]: `%${searchText}%` } },
-
+          { '$Client.name$': { [Op.like]: `%${searchText}%` } }
         ]
       }
     }
@@ -31,8 +31,12 @@ class OrderDAO {
         nest: true,
         include: [Service, Client]
       }),
-      Order.count({ where: whereClause })
-    ])
+      Order.count({
+        where: whereClause,
+        include: [Client]
+      })
+    ]);
+
     return { data, count }
   }
 

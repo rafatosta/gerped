@@ -17,8 +17,9 @@ export default defineConfig({
   renderer: {
     resolve: {
       alias: {
-        '@renderer': resolve('src/renderer/src')
-      }
+        '@renderer': resolve('src/renderer/src'),
+        '@backend': resolve('src/main/sequelize')
+      },
     },
     plugins: [react()]
   }

@@ -17,6 +17,9 @@ const Sidebar: React.FC = () => {
           <Sbar.Item as={Link} to="/clients">
             Clientes
           </Sbar.Item>
+          <Sbar.Item as={Link} to="/orders">
+            Pedidos
+          </Sbar.Item>
           <Sbar.Item as={Link} to="/services">
             Serviços
           </Sbar.Item>
