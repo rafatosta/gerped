@@ -1,12 +1,15 @@
-import { Button, FloatingLabel, Label, Tabs, TextInput } from 'flowbite-react'
+import { Badge, Button, FloatingLabel, Label, Tabs, TextInput } from 'flowbite-react'
 import { FormEvent, useEffect, useState, useCallback } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 
 import Title from '@renderer/components/Title'
 import InputMask from 'react-input-mask'
 import Client from '@backend/models/Client'
 import { useClient } from '@renderer/hooks/useClient'
 import Container from '@renderer/components/Container'
+import GenericTable from '@renderer/components/GenericTable'
+import Order from '@backend/models/Order'
+import { OrderStatus } from '@backend/enums/OrderStatus'
 
 function ClienteDetails() {
   const { id } = useParams<{ id: string }>()
@@ -71,6 +74,34 @@ function ClienteDetails() {
       console.error('ID is undefined')
     }
   }, [client.id, remove, navigate])
+
+  const columns = [
+    {
+      header: 'Cliente',
+      accessor: (data: Order) => data.theme,
+      className: 'whitespace-nowrap font-medium text-gray-900'
+    },
+    {
+      header: 'Entrega',
+      accessor: (data: Order) => `${data.deliveryDate.toDateString()}`
+    },
+    {
+      header: 'Situação',
+      accessor: (data: Order) => (
+        <Badge color={data.status == OrderStatus.ATIVO ? "warning" : "success"} className="flex justify-center items-center">
+          {OrderStatus[data.status]}
+        </Badge>
+      ),
+    },
+    {
+      header: 'Ações',
+      accessor: (data: Order) => (
+        <Link to={`/orders/${data.id}`} className="font-medium text-cyan-600 hover:underline">
+          Visualizar
+        </Link>
+      )
+    }
+  ];
 
   return (
     <Container>
@@ -139,6 +170,9 @@ function ClienteDetails() {
           </Button>
         </div>
       </form>
+
+
+      {client.Orders && <GenericTable data={client.Orders} columns={columns} keyExtractor={(data: Order) => data.id} />}
     </Container>
   )
 }
