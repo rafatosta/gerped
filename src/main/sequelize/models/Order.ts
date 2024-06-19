@@ -13,8 +13,8 @@ export interface OrderAttributes {
     deliveryDate: Date;
     price: number;
     status: OrderStatus;
-    Client: Client
-    Service: Service
+    Client?: Client;
+    Service?: Service;
 }
 
 interface OrderCreationAttributes extends Optional<OrderAttributes, 'id'> { }
@@ -29,7 +29,7 @@ class Order extends Model<OrderAttributes, OrderCreationAttributes> implements O
     public price!: number;
     public status!: OrderStatus;
     public Client!: Client;
-    public Service!: Service
+    public Service!: Service;
 
 
     // timestamps!
