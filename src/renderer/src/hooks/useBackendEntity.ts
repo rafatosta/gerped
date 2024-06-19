@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 
 export function useBackendEntity<T>(
-  findAll: (searchText: string, currentPage: number) => Promise<{ data: T[]; count: number }>,
+  findAll: (...args: any[]) => Promise<{ data: T[]; count: number }>,
   findById: (id: string) => Promise<T>,
   save: (data: T) => Promise<T>,
   remove: (id: number) => Promise<T>,
   searchText: string = '',
-  currentPage?: number
+  currentPage?: number,
+  ...extraParams: any[]
 ) {
   const [data, setData] = useState<T[]>([]);
   const [count, setCount] = useState<number>(0);
@@ -14,14 +15,14 @@ export function useBackendEntity<T>(
   const fetchData = useCallback(async () => {
     if (currentPage !== undefined) {
       try {
-        const { data, count } = await findAll(searchText, currentPage);
+        const { data, count } = await findAll(searchText, currentPage, ...extraParams);
         setCount(count);
         setData(data);
       } catch (err) {
         console.log('Erro:', err);
       }
     }
-  }, [searchText, currentPage, findAll]);
+  }, [searchText, currentPage, findAll, ...extraParams]);
 
   const saveData = useCallback(
     async (data: T): Promise<T> => {
