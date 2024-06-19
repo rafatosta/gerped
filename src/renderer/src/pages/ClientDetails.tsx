@@ -12,6 +12,7 @@ import Order from '@backend/models/Order'
 import { OrderStatus } from '@backend/enums/OrderStatus'
 import formatDate from '@renderer/utils/formatDate'
 
+
 function ClienteDetails() {
   const { id } = useParams<{ id: string }>()
 
