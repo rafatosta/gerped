@@ -1,19 +1,17 @@
 // FloatingSelect.tsx
-import React, { ReactNode, useState, useEffect } from 'react';
+import React, { ReactNode, useState, useEffect, SelectHTMLAttributes } from 'react';
 import { MdArrowDropDown } from 'react-icons/md';
 
-interface FloatingSelectProps {
+interface FloatingSelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label: string;
   children: ReactNode;
-  value: string;
-  onChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
 }
 
-const FloatingSelect: React.FC<FloatingSelectProps> = ({ label, children, value, onChange }) => {
+const FloatingSelect: React.FC<FloatingSelectProps> = ({ label, children, value, onChange, ...props }) => {
   const [hasValue, setHasValue] = useState(false);
 
   useEffect(() => {
-    setHasValue(value !== '');
+    setHasValue(value !== undefined && value !== '');
   }, [value]);
 
   return (
@@ -23,9 +21,10 @@ const FloatingSelect: React.FC<FloatingSelectProps> = ({ label, children, value,
         value={value}
         className="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
         onChange={(e) => {
-          onChange(e);
+          onChange && onChange(e);
           setHasValue(e.target.value !== '');
         }}
+        {...props}
       >
         <option value="">{label}</option>
         {children}
