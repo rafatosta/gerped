@@ -37,7 +37,16 @@ class OrderDAO {
         order: [['createdAt', 'DESC']],
         raw: true,
         nest: true,
-        include: [Service, Client]
+        include: [
+          {
+            model: Service,
+            attributes: ['description']
+          },
+          {
+            model: Client,
+            attributes: ['name']
+          }
+        ]
       }),
       Order.count({
         where: whereClause,

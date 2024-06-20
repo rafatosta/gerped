@@ -35,6 +35,10 @@ function Orders() {
             className: 'whitespace-nowrap font-medium text-gray-900'
         },
         {
+            header: 'Serviço',
+            accessor: (data: Order) => data.Service.description
+        },
+        {
             header: 'Entrega',
             accessor: (data: Order) => formatDate(data.deliveryDate)
         },
