@@ -13,8 +13,6 @@ class OrderDAO {
     const limit = 15
     const offset = (page - 1) * limit
 
-    console.log(OrderStatus[filterStatus]);
-
     let whereClause: any = {}
     if (searchText) {
       whereClause = {
@@ -59,6 +57,55 @@ class OrderDAO {
 
   static async findById(id: number): Promise<Order | null> {
     return await Order.findByPk(id, { raw: true, nest: true })
+  }
+
+  static async findOrdersByClientId(
+    clientId: number,
+    searchText: string,
+    page: number,
+    filterStatus: OrderStatus
+  ): Promise<{ data: Order[]; count: number }> {
+    const limit = 15;
+    const offset = (page - 1) * limit;
+  
+    let whereClause: any = {
+      idClient: clientId
+    };
+  
+    if (searchText) {
+      whereClause[Op.or] = [
+        { theme: { [Op.like]: `%${searchText}%` } },
+        { '$Service.description$': { [Op.like]: `%${searchText}%` } }
+      ];
+    }
+    
+  
+    if (filterStatus && filterStatus !== OrderStatus.TODOS) {
+      whereClause.status = filterStatus;
+    }
+  
+    const [data, count] = await Promise.all([
+      Order.findAll({
+        where: whereClause,
+        limit: limit,
+        offset: offset,
+        include: [{
+          model: Service,
+          attributes: ['description']
+        }],
+        raw: true,
+        nest: true,
+      }),
+      Order.count({
+        where: whereClause,
+        include: [{
+          model: Service,
+          attributes: ['description']
+        }],
+      })
+    ]);
+  
+    return { data, count };
   }
 
   static async save(data: Order): Promise<Order | null> {

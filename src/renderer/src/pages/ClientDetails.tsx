@@ -1,4 +1,4 @@
-import { Badge, Button, FloatingLabel, Label, Tabs, TextInput } from 'flowbite-react'
+import { Badge, Button, Dropdown, FloatingLabel, Label, Tabs, TextInput } from 'flowbite-react'
 import { FormEvent, useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 
@@ -11,12 +11,18 @@ import GenericTable from '@renderer/components/GenericTable'
 import Order from '@backend/models/Order'
 import { OrderStatus } from '@backend/enums/OrderStatus'
 import formatDate from '@renderer/utils/formatDate'
+import { useOrder } from '@renderer/hooks/useOrder'
+import PaginationControls from '@renderer/components/PaginationControls'
 
 
 function ClienteDetails() {
   const { id } = useParams<{ id: string }>()
 
   const navigate = useNavigate()
+
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [searchText, setSearchText] = useState<string>('')
+  const [filterStatus, setFilterStatus] = useState<OrderStatus>(OrderStatus.ATIVO);
 
   const [buttonUpEnable, setButtonUpEnable] = useState(true)
   const [client, setClient] = useState<Client>({
@@ -28,6 +34,11 @@ function ClienteDetails() {
   } as Client)
 
   const { save, findById, remove } = useClient()
+  const { data, count, findOrdersByClientId } = useOrder()
+
+  const onPageChange = (page: number) => setCurrentPage(page)
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) =>
+    setSearchText(event.target.value)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -44,6 +55,12 @@ function ClienteDetails() {
     }
     fetchData()
   }, [id])
+
+  useEffect(() => {
+    if (id) {
+      findOrdersByClientId(id, searchText, currentPage, filterStatus)
+    }
+  }, [currentPage, searchText, filterStatus])
 
   const handleInputChange = (field: keyof Client) => (e: React.ChangeEvent<HTMLInputElement>) => {
     if (field === 'phone') {
@@ -79,8 +96,13 @@ function ClienteDetails() {
 
   const columns = [
     {
-      header: 'Cliente',
-      accessor: (data: Order) => data.theme,
+      header: 'Tema',
+      accessor: (data: Order) => (
+        <div>
+          {data.theme}
+          <p className="text-xs text-gray-500">{data.Service.description}</p>
+        </div>
+      ),
       className: 'whitespace-nowrap font-medium text-gray-900'
     },
     {
@@ -172,9 +194,35 @@ function ClienteDetails() {
           </Button>
         </div>
       </form>
-
-
-      {client.Orders && <GenericTable data={client.Orders} columns={columns} keyExtractor={(data: Order) => data.id} />}
+      <Title disabled>Lista de Pedidos</Title>
+      <div className="grid grid-cols-3 items-start gap-x-4">
+        <div >
+          <FloatingLabel
+            variant="standard"
+            label="Buscar"
+            type="text"
+            value={searchText}
+            onChange={handleSearch}
+          />
+        </div>
+        <div className="flex items-center gap-x-4">
+          <p>Filtrar por:</p>
+          <Dropdown color="gray" label={filterStatus ? OrderStatus[filterStatus] : "TODOS"}>
+            <Dropdown.Item onClick={() => setFilterStatus(OrderStatus.ATIVO)}>ATIVO</Dropdown.Item>
+            <Dropdown.Item onClick={() => setFilterStatus(OrderStatus.FINALIZADO)}>FINALIZADO</Dropdown.Item>
+            <Dropdown.Item onClick={() => setFilterStatus(OrderStatus.TODOS)}>TODOS</Dropdown.Item>
+          </Dropdown>
+        </div>
+        <div className="flex justify-end">
+          <Button >Novo</Button>
+        </div>
+      </div>
+      <GenericTable data={data} columns={columns} keyExtractor={(data: Order) => data.id} />
+      <PaginationControls
+        currentPage={currentPage}
+        totalRecords={count}
+        onPageChange={onPageChange}
+      />
     </Container>
   )
 }

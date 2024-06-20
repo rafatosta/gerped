@@ -66,5 +66,5 @@ export function useBackendEntity<T>(
     }
   }, [fetchData, searchText, currentPage]);
 
-  return { data, count, save: saveData, findById: findByIdData, remove: removeData };
+  return { data, count, save: saveData, findById: findByIdData, remove: removeData, setData, setCount };
 }

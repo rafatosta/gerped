@@ -104,6 +104,10 @@ app.whenReady().then(() => {
     return OrderDAO.findById(id)
   })
 
+  ipcMain.handle('order:findOrdersByClientId', async (_, idClient, searchText, page, filterStatus) => {
+    return OrderDAO.findOrdersByClientId(idClient, searchText, page, filterStatus)
+  })
+
   ipcMain.handle('order:save', async (_, data) => {
     return OrderDAO.save(data)
   })

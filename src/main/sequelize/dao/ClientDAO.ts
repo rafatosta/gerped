@@ -1,7 +1,5 @@
 import { Op } from 'sequelize'
 import Client, { ClientAttributes } from '../models/Client'
-import Order from '@backend/models/Order';
-import Service from '@backend/models/Service';
 
 class ClientDAO {
   static async findAll(
@@ -36,22 +34,8 @@ class ClientDAO {
     return { data, count }
   }
 
-  static async findById(id: number): Promise<Client | ClientAttributes | null> {
-    const res = await Client.findByPk(
-      id,
-      {
-        raw: false,
-        nest: true,
-        include: [{
-          model: Order,
-          include: [Service],
-        }]
-      }
-    )
-    const result = res ? res.toJSON() : null;
-
-    console.log(result);
-    return result;
+  static async findById(id: number): Promise<Client | null> {
+    return await Client.findByPk(id, { raw: true })
   }
 
   static async save(data: Client): Promise<Client | ClientAttributes | null> {
