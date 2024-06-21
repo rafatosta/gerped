@@ -56,7 +56,19 @@ class OrderDAO {
   }
 
   static async findById(id: number): Promise<Order | null> {
-    return await Order.findByPk(id, { raw: true, nest: true })
+    return await Order.findByPk(
+      id,
+      {
+        raw: true,
+        nest: true,
+        include: [
+          {
+            model: Client,
+            attributes: ['id', 'name']
+          }
+        ]
+      }
+    )
   }
 
   static async findOrdersByClientId(
@@ -67,23 +79,23 @@ class OrderDAO {
   ): Promise<{ data: Order[]; count: number }> {
     const limit = 15;
     const offset = (page - 1) * limit;
-  
+
     let whereClause: any = {
       idClient: clientId
     };
-  
+
     if (searchText) {
       whereClause[Op.or] = [
         { theme: { [Op.like]: `%${searchText}%` } },
         { '$Service.description$': { [Op.like]: `%${searchText}%` } }
       ];
     }
-    
-  
+
+
     if (filterStatus && filterStatus !== OrderStatus.TODOS) {
       whereClause.status = filterStatus;
     }
-  
+
     const [data, count] = await Promise.all([
       Order.findAll({
         where: whereClause,
@@ -104,7 +116,7 @@ class OrderDAO {
         }],
       })
     ]);
-  
+
     return { data, count };
   }
 

@@ -6,6 +6,7 @@ import Clients from './pages/Clients'
 import ClientDetails from './pages/ClientDetails'
 import Services from './pages/Services'
 import Orders from './pages/Orders'
+import OrderForm from './pages/OrderForm'
 
 function App(): JSX.Element {
   return (
@@ -18,6 +19,7 @@ function App(): JSX.Element {
             <Route path="/clients" element={<Clients />} />
             <Route path="/clients/:id" element={<ClientDetails />} />
             <Route path="/orders" element={<Orders />} />
+            <Route path="/orders/:orderId" element={<OrderForm />} />
             <Route path="/services" element={<Services />} />
             <Route path="/about" element={<About />} />
           </Routes>

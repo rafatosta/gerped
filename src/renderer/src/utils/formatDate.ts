@@ -4,5 +4,6 @@ export default function formatDate(timestamp) {
   const mes = String(data.getMonth() + 1).padStart(2, '0') // Mês começa do zero
   const ano = data.getFullYear()
 
-  return `${dia}/${mes}/${ano}`
+  //return `${dia}/${mes}/${ano}`
+  return `${ano}-${mes}-${dia}`
 }
