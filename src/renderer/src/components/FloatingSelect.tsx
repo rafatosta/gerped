@@ -32,13 +32,12 @@ const FloatingSelect: React.FC<FloatingSelectProps> = ({ label, children, value,
 
       <label
         htmlFor="floating_filled"
-        className={`absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform ${
-          hasValue ? '-translate-y-4 scale-75 top-4' : 'top-5'
-        } z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500`}
+        className={`absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform ${hasValue ? '-translate-y-4 scale-75 top-4' : 'top-5'
+          } z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500`}
       >
         {label}
       </label>
-      
+
       <MdArrowDropDown className="absolute right-2 top-5 text-gray-500 pointer-events-none" size={24} />
     </div>
   );
