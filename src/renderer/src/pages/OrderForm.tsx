@@ -1,5 +1,4 @@
 import { OrderStatus } from "@backend/enums/OrderStatus";
-import Client from "@backend/models/Client";
 import Order from "@backend/models/Order";
 import Container from "@renderer/components/Container";
 import FloatingSelect from "@renderer/components/FloatingSelect";
@@ -29,9 +28,9 @@ function OrderForm() {
 
     } as Order)
 
-    const { data: dataService } = useService("", 1)
+    const { data: dataService } = useService()
     const { save, findById } = useOrder()
-    const { data: dataClient } = useClient("", 1)
+    const { data: dataClient } = useClient()
 
     useEffect(() => {
         console.log('order:', orderId, 'client:', clientId);
@@ -98,19 +97,6 @@ function OrderForm() {
                         onChange={handleChange}
                         required
                     >
-                        {/* orderId &&
-                        <option key={order.idClient} value={order.idClient}>
-                            {order.Client?.name}
-                        </option>
-
-                        clientId && {
-                            dataClient.map((client) => (
-                                <option key={client.id} value={client.id}>
-                                    {client.name}
-                                </option>
-                            ))
-                        } */}
-
                         {orderId ?
                             <option key={order.idClient} value={order.idClient}>
                                 {order.Client?.name}
@@ -127,7 +113,7 @@ function OrderForm() {
                     </FloatingSelect>
 
                     <FloatingSelect
-                        label="Tipo do serviço"
+                        label={order.idService ? "Serviço" : "Selecione o serviço"}
                         name="idService"
                         value={order.idService}
                         onChange={handleChange}
