@@ -4,7 +4,7 @@ import { MdArrowDropDown } from 'react-icons/md';
 
 interface FloatingSelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label: string;
-  children: ReactNode;
+  children?: ReactNode;
 }
 
 const FloatingSelect: React.FC<FloatingSelectProps> = ({ label, children, value, onChange, ...props }) => {
