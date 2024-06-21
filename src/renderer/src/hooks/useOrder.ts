@@ -32,7 +32,7 @@ function findOrdersByClientIdFromIPC(
   return window.electron.ipcRenderer.invoke('order:findOrdersByClientId', idClient, searchText, currentPage, filterStatus);
 }
 
-export function useOrder(searchText: string = '', currentPage?: number, filterStatus?: OrderStatus) {
+export function useOrder(searchText?: string, currentPage?: number, filterStatus?: OrderStatus) {
   const { data, count, save, findById, remove, setData, setCount } = useBackendEntity<Order>(
     findAllFromIPC,
     findByIdFromIPC,

@@ -5,7 +5,7 @@ export function useBackendEntity<T>(
   findById: (id: string) => Promise<T>,
   save: (data: T) => Promise<T>,
   remove: (id: number) => Promise<T>,
-  searchText: string = '',
+  searchText?: string,
   currentPage?: number,
   ...extraParams: any[]
 ) {
@@ -13,7 +13,6 @@ export function useBackendEntity<T>(
   const [count, setCount] = useState<number>(0);
 
   const fetchData = useCallback(async () => {
-    if (currentPage !== undefined) {
       try {
         const { data, count } = await findAll(searchText, currentPage, ...extraParams);
         setCount(count);
@@ -21,7 +20,6 @@ export function useBackendEntity<T>(
       } catch (err) {
         console.log('Erro:', err);
       }
-    }
   }, [searchText, currentPage, findAll, ...extraParams]);
 
   const saveData = useCallback(
@@ -61,9 +59,7 @@ export function useBackendEntity<T>(
     }, [fetchData, remove]);
 
   useEffect(() => {
-    if (currentPage !== undefined) {
       fetchData();
-    }
   }, [fetchData, searchText, currentPage]);
 
   return { data, count, save: saveData, findById: findByIdData, remove: removeData, setData, setCount };

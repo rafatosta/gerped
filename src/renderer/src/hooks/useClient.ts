@@ -20,7 +20,7 @@ function deleteFromIPC(id: number): Promise<Client> {
   return window.electron.ipcRenderer.invoke('client:delete', id)
 }
 
-export function useClient(searchText: string = '', currentPage?: number) {
+export function useClient(searchText?: string, currentPage?: number) {
   
   return useBackendEntity<Client>(
     findAllFromIPC,

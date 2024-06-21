@@ -3,35 +3,43 @@ import Client, { ClientAttributes } from '../models/Client'
 
 class ClientDAO {
   static async findAll(
-    searchText: string,
-    page: number
+    searchText?: string,
+    page?: number
   ): Promise<{ data: Client[]; count: number }> {
-    const limit = 15
-    const offset = (page - 1) * limit
+    
+    const limit = 15;
+    let offset = 0;
+    let options: any = {
+      where: {},
+      order: [['createdAt', 'DESC']],
+      raw: true
+    };
 
-    let whereClause = {}
+    // Verifica se page está definido e maior que 0 para aplicar limit e offset
+    if (page && page > 0) {
+      offset = (page - 1) * limit;
+      options.limit = limit;
+      options.offset = offset;
+    }
+
+    // Verifica se searchText está definido para construir a cláusula where
     if (searchText) {
-      whereClause = {
+      options.where = {
         [Op.or]: [
           { name: { [Op.like]: `%${searchText}%` } },
           { phone: { [Op.like]: `%${searchText}%` } },
           { course: { [Op.like]: `%${searchText}%` } }
         ]
-      }
+      };
     }
 
+    // Executa as consultas de forma assíncrona
     const [data, count] = await Promise.all([
-      Client.findAll({
-        where: whereClause,
-        limit: limit,
-        offset: offset,
-        order: [['createdAt', 'DESC']],
-        raw: true
-      }),
-      Client.count({ where: whereClause })
-    ])
+      Client.findAll(options),
+      Client.count({ where: options.where })
+    ]);
 
-    return { data, count }
+    return { data, count };
   }
 
   static async findById(id: number): Promise<Client | null> {

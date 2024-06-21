@@ -6,53 +6,60 @@ import { OrderStatus } from '@backend/enums/OrderStatus';
 
 class OrderDAO {
   static async findAll(
-    searchText: string,
-    page: number,
-    filterStatus: OrderStatus
+    searchText?: string,
+    page?: number,
+    filterStatus?: OrderStatus
   ): Promise<{ data: Order[]; count: number }> {
-    const limit = 15
-    const offset = (page - 1) * limit
+    const limit = 15;
+    let offset = 0;
+    let whereClause: any = {};
+    let options: any = {
+      where: whereClause,
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true,
+      include: [
+        {
+          model: Service,
+          attributes: ['description']
+        },
+        {
+          model: Client,
+          attributes: ['name']
+        }
+      ]
+    };
 
-    let whereClause: any = {}
-    if (searchText) {
-      whereClause = {
-        [Op.or]: [
-          { theme: { [Op.like]: `%${searchText}%` } },
-          { '$Client.name$': { [Op.like]: `%${searchText}%` } }
-        ]
-      }
+    // Verifica se page está definido e maior que 0 para aplicar limit e offset
+    if (page && page > 0) {
+      offset = (page - 1) * limit;
+      options.limit = limit;
+      options.offset = offset;
     }
 
+    // Verifica se searchText está definido para construir a cláusula where
+    if (searchText) {
+      whereClause[Op.or] = [
+        { theme: { [Op.like]: `%${searchText}%` } },
+        { '$Client.name$': { [Op.like]: `%${searchText}%` } }
+      ];
+    }
+
+    // Verifica se filterStatus está definido e diferente de OrderStatus.TODOS
     if (filterStatus && filterStatus != OrderStatus.TODOS) {
       whereClause.status = filterStatus;
     }
 
+    // Executa as consultas de forma assíncrona
     const [data, count] = await Promise.all([
-      Order.findAll({
-        where: whereClause,
-        limit: limit,
-        offset: offset,
-        order: [['createdAt', 'DESC']],
-        raw: true,
-        nest: true,
-        include: [
-          {
-            model: Service,
-            attributes: ['description']
-          },
-          {
-            model: Client,
-            attributes: ['name']
-          }
-        ]
-      }),
+      Order.findAll(options),
       Order.count({
         where: whereClause,
         include: [Client]
       })
     ]);
 
-    return { data, count }
+    return { data, count };
   }
 
   static async findById(id: number): Promise<Order | null> {

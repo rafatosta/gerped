@@ -3,31 +3,39 @@ import { Op } from 'sequelize'
 
 class ServiceDAO {
   static async findAll(
-    searchText: string,
-    page: number
+    searchText?: string,
+    page?: number
   ): Promise<{ data: Service[]; count: number }> {
-    const limit = 15
-    const offset = (page - 1) * limit
 
-    let whereClause = {}
+    const limit = 15;
+    let offset = 0;
+    let options: any = {
+      where: {},
+      order: [['createdAt', 'DESC']],
+      raw: true
+    };
+
+    // Verifica se page está definido e maior que 0 para aplicar limit e offset
+    if (page && page > 0) {
+      offset = (page - 1) * limit;
+      options.limit = limit;
+      options.offset = offset;
+    }
+
+    // Verifica se page está definido e maior que 0 para aplicar limit e offset
     if (searchText) {
-      whereClause = {
+      options.where = {
         [Op.or]: [
           { description: { [Op.like]: `%${searchText}%` } },
         ]
       }
     }
-
+    // Executa as consultas de forma assíncrona
     const [data, count] = await Promise.all([
-      Service.findAll({
-        where: whereClause,
-        limit: limit,
-        offset: offset,
-        order: [['createdAt', 'DESC']],
-        raw: true
-      }),
-      Service.count({ where: whereClause })
-    ])
+      Service.findAll(options),
+      Service.count({ where: options.where })
+    ]);
+
 
     return { data, count }
   }
