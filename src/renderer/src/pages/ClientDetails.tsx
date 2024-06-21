@@ -34,7 +34,7 @@ function ClienteDetails() {
   } as Client)
 
   const { save, findById, remove } = useClient()
-  const { data, count, findOrdersByClientId } = useOrder()
+  const { dataOrdersByClient, countOrdersByClient, findOrdersByClientId } = useOrder()
 
   const onPageChange = (page: number) => setCurrentPage(page)
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) =>
@@ -57,7 +57,7 @@ function ClienteDetails() {
   }, [id])
 
   useEffect(() => {
-    if (id) {
+    if (id) { 
       findOrdersByClientId(id, searchText, currentPage, filterStatus)
     }
   }, [currentPage, searchText, filterStatus])
@@ -214,13 +214,13 @@ function ClienteDetails() {
           </Dropdown>
         </div>
         <div className="flex justify-end">
-          <Button >Novo</Button>
+          <Button onClick={() => navigate(`/orders/create/${client.id}`)}>Novo</Button>
         </div>
       </div>
-      <GenericTable data={data} columns={columns} keyExtractor={(data: Order) => data.id} />
+      <GenericTable data={dataOrdersByClient} columns={columns} keyExtractor={(data: Order) => data.id} />
       <PaginationControls
         currentPage={currentPage}
-        totalRecords={count}
+        totalRecords={countOrdersByClient}
         onPageChange={onPageChange}
       />
     </Container>
