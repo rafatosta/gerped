@@ -39,9 +39,8 @@ function ClientFormModal({ saveCliente }: IClienteFormDialog) {
     try {
       const novoCliente = await saveCliente(client)
 
-      if (buttonName === 'newOrder') {
-        console.log('new ID:', novoCliente.id)
-        //navigate(`/pedido/cliente/${novoCliente.id}`);
+      if (buttonName === 'btnCreateOrder') {
+        navigate(`/orders/create/${novoCliente.id}`);
       }
 
       onCloseModal()
@@ -129,7 +128,7 @@ function ClientFormModal({ saveCliente }: IClienteFormDialog) {
                 <Button name="saveClient" color="green" type="submit">
                   Finalizar
                 </Button>
-                <Button name="newOrder" type="submit">
+                <Button name="btnCreateOrder" type="submit">
                   Salvar e criar pedido
                 </Button>
               </div>

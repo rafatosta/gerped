@@ -52,6 +52,10 @@ function OrderForm() {
                 });
         } else if (clientId) {
             console.log('bucar cliente apenas');
+            setOrder((prevOrder) => ({
+                ...prevOrder,
+                idClient: parseInt(clientId)
+            } as Order))
 
         }
 
@@ -97,11 +101,8 @@ function OrderForm() {
                         onChange={handleChange}
                         required
                     >
-                        {orderId ?
-                            <option key={order.idClient} value={order.idClient}>
-                                {order.Client?.name}
-                            </option>
-                            :
+
+                        {
                             dataClient.map((client) => (
                                 <option key={client.id} value={client.id}>
                                     {client.name}

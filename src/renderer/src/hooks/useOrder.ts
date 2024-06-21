@@ -1,7 +1,7 @@
 import Order from '@backend/models/Order';
 import { useBackendEntity } from './useBackendEntity';
 import { OrderStatus } from '@backend/enums/OrderStatus';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 function findAllFromIPC(
   searchText: string,
@@ -33,6 +33,11 @@ function findOrdersByClientIdFromIPC(
 }
 
 export function useOrder(searchText?: string, currentPage?: number, filterStatus?: OrderStatus) {
+
+  const [dataOrdersByClient, setDataOrdersByClient] = useState<Order[]>([]);
+  const [countOrdersByClient, setCountOrdersByClient] = useState<number>(0);
+
+
   const { data, count, save, findById, remove, setData, setCount } = useBackendEntity<Order>(
     findAllFromIPC,
     findByIdFromIPC,
@@ -47,14 +52,14 @@ export function useOrder(searchText?: string, currentPage?: number, filterStatus
     async (idClient: string, searchText: string, currentPage: number, filterStatus: OrderStatus) => {
       try {
         const { data, count } = await findOrdersByClientIdFromIPC(idClient, searchText, currentPage, filterStatus);
-        setData(data); // Atualiza os dados com os resultados de findOrdersByClientIdFromIPC
-        setCount(count); // Atualiza a contagem com os resultados de findOrdersByClientIdFromIPC
+        setDataOrdersByClient(data); // Atualiza os dados com os resultados de findOrdersByClientIdFromIPC
+        setCountOrdersByClient(count); // Atualiza a contagem com os resultados de findOrdersByClientIdFromIPC
       } catch (err) {
         console.log('Erro:', err);
       }
     },
-    [setData, setCount] // Inclui setData e setCount como dependências
+    [dataOrdersByClient, countOrdersByClient] // Inclui setData e setCount como dependências
   );
 
-  return { data, count, save, findById, remove, findOrdersByClientId };
+  return { data, count, save, findById, remove, findOrdersByClientId, dataOrdersByClient, countOrdersByClient };
 }
