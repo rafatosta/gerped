@@ -4,6 +4,7 @@ import Order from "@backend/models/Order";
 import Container from "@renderer/components/Container";
 import FloatingSelect from "@renderer/components/FloatingSelect";
 import Title from "@renderer/components/Title";
+import { useClient } from "@renderer/hooks/useClient";
 import { useOrder } from "@renderer/hooks/useOrder";
 import { useService } from "@renderer/hooks/useService";
 import formatDate from "@renderer/utils/formatDate";
@@ -18,7 +19,6 @@ function OrderForm() {
     const navigate = useNavigate()
 
     const [order, setOrder] = useState<Order>({
-        id: 0,
         idClient: 0,
         idService: 0,
         theme: "",
@@ -31,6 +31,7 @@ function OrderForm() {
 
     const { data: dataService } = useService("", 1)
     const { save, findById } = useOrder()
+    const { data: dataClient } = useClient("", 1)
 
     useEffect(() => {
         console.log('order:', orderId, 'client:', clientId);
@@ -50,6 +51,9 @@ function OrderForm() {
                 .catch(error => {
                     console.error('Erro ao buscar order:', error);
                 });
+        } else if (clientId) {
+            console.log('bucar cliente apenas');
+
         }
 
     }, [orderId, clientId])
@@ -69,7 +73,7 @@ function OrderForm() {
         console.log(order)
         save(order)
         navigate(-1)
-      }
+    }
 
     return (
         <Container>
@@ -94,22 +98,32 @@ function OrderForm() {
                         onChange={handleChange}
                         required
                     >
+                        {/* orderId &&
+                        <option key={order.idClient} value={order.idClient}>
+                            {order.Client?.name}
+                        </option>
+
+                        clientId && {
+                            dataClient.map((client) => (
+                                <option key={client.id} value={client.id}>
+                                    {client.name}
+                                </option>
+                            ))
+                        } */}
+
                         {orderId ?
                             <option key={order.idClient} value={order.idClient}>
                                 {order.Client?.name}
                             </option>
                             :
-                            <option key={order.idClient} value={order.idClient}>
-                                lista de clientes
-                            </option>
+                            dataClient.map((client) => (
+                                <option key={client.id} value={client.id}>
+                                    {client.name}
+                                </option>
+                            ))
                         }
 
-                        {/* Supondo que haja uma lista de clientes */}
-                        {/* {clients.map(client => (
-                            <option key={client.id} value={client.id}>
-                                {client.name}
-                            </option>
-                        ))} */}
+
                     </FloatingSelect>
 
                     <FloatingSelect

@@ -19,6 +19,7 @@ function App(): JSX.Element {
             <Route path="/clients" element={<Clients />} />
             <Route path="/clients/:id" element={<ClientDetails />} />
             <Route path="/orders" element={<Orders />} />
+            <Route path="/orders/create" element={<OrderForm />} />
             <Route path="/orders/:orderId" element={<OrderForm />} />
             <Route path="/services" element={<Services />} />
             <Route path="/about" element={<About />} />

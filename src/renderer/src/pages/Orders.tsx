@@ -9,15 +9,16 @@ import { useOrder } from "@renderer/hooks/useOrder";
 import formatDate from "@renderer/utils/formatDate";
 import { Badge, Button, Dropdown, FloatingLabel } from "flowbite-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function Orders() {
     const [currentPage, setCurrentPage] = useState<number>(1)
     const [searchText, setSearchText] = useState<string>('')
     const [filterStatus, setFilterStatus] = useState<OrderStatus>(OrderStatus.ATIVO);
 
+    const navigate = useNavigate()
 
-    const { data, count, save } = useOrder(searchText, currentPage, filterStatus)
+    const { data, count } = useOrder(searchText, currentPage, filterStatus)
 
     const onPageChange = (page: number) => setCurrentPage(page)
     const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) =>
@@ -83,7 +84,7 @@ function Orders() {
                     </Dropdown>
                 </div>
                 <div className="flex justify-end">
-                    <Button >Novo</Button>
+                    <Button onClick={() => navigate('/orders/create')}>Novo</Button>
                 </div>
             </div>
             <GenericTable data={data} columns={columns} keyExtractor={(data: Order) => data.id} />
