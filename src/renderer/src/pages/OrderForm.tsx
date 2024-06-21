@@ -26,11 +26,11 @@ function OrderForm() {
         deliveryDate: new Date(),
         price: 0,
         status: OrderStatus.ATIVO,
-       
+
     } as Order)
 
     const { data: dataService } = useService("", 1)
-    const { findById } = useOrder()
+    const { save, findById } = useOrder()
 
     useEffect(() => {
         console.log('order:', orderId, 'client:', clientId);
@@ -60,10 +60,16 @@ function OrderForm() {
 
         setOrder((prevOrder) => ({
             ...prevOrder,
-            [name]: name == 'price' ? parseFloat(value) : value,
+            [name]: name === 'price' ? parseFloat(value) : (name === 'orderDate' || name === 'deliveryDate') ? new Date(value) : value,
         } as Order));
 
     };
+
+    const handleSave = async () => {
+        console.log(order)
+        save(order)
+        navigate(-1)
+      }
 
     return (
         <Container>
@@ -72,7 +78,13 @@ function OrderForm() {
                 {orderId && <p className="text-gray-400 italic text-lg">#{orderId}</p>}
             </div>
 
-            <form className="flex flex-col gap-1">
+            <form
+                className="flex flex-col gap-1"
+                onSubmit={(e) => {
+                    e.preventDefault()
+                    handleSave()
+                }}
+            >
                 <div className="grid grid-cols-2 gap-2">
                     <FloatingSelect
                         label={order.idClient ? "Cliente" : "Selecione o cliente"}
@@ -128,7 +140,7 @@ function OrderForm() {
                         variant="filled"
                         label="Data do pedido"
                         name="orderDate"
-                        value={formatDate(order.orderDate)}
+                        value={new Date(order.orderDate).toISOString().slice(0, 10)}
                         type="date"
                         onChange={handleChange}
                         required
@@ -137,7 +149,7 @@ function OrderForm() {
                         variant="filled"
                         label="Data de entrega"
                         name="deliveryDate"
-                        value={formatDate(order.deliveryDate)}
+                        value={new Date(order.deliveryDate).toISOString().slice(0, 10)}
                         type="date"
                         onChange={handleChange}
                         required
