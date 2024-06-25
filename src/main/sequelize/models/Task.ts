@@ -1,11 +1,11 @@
 import { TaskStatus } from "@backend/enums/TaskStatus";
 import { Model, DataTypes, Optional } from 'sequelize';
-import Order from "./Order";
 import sequelize from "@backend/db";
+
 
 export interface TaskAttributes {
     id?: number;
-    idOrder: number;
+    idOrder?: number;
     status: TaskStatus;
     description: string;
     conclusionDate?: Date;
@@ -31,14 +31,6 @@ Task.init(
             autoIncrement: true,
             primaryKey: true,
         },
-        idOrder: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            references: {
-                model: Order,
-                key: 'id',
-            }
-        },
         status: {
             type: DataTypes.INTEGER,
             defaultValue: TaskStatus.PENDENTE,
@@ -58,7 +50,5 @@ Task.init(
         tableName: 'Tasks'
     }
 )
-
-//Task.belongsTo(Order, { foreignKey: 'idOrder', constraints: false});
 
 export default Task;

@@ -3,10 +3,11 @@ import sequelize from '../db';
 import { OrderStatus } from '@backend/enums/OrderStatus';
 import Client from './Client';
 import Service from './Service';
+import Task from './Task';
 
 export interface OrderAttributes {
     id?: number;
-    idClient: number;
+    idClient?: number;
     idService: number;
     theme: string;
     orderDate: Date;
@@ -15,6 +16,7 @@ export interface OrderAttributes {
     status: OrderStatus;
     Client?: Client;
     Service?: Service;
+    Tasks?: Task[]
 }
 
 interface OrderCreationAttributes extends Optional<OrderAttributes, 'id'> { }
@@ -30,6 +32,7 @@ class Order extends Model<OrderAttributes, OrderCreationAttributes> implements O
     public status!: OrderStatus;
     public Client!: Client;
     public Service!: Service;
+    public Tasks!: Task[]
 
 
     // timestamps!
@@ -37,10 +40,13 @@ class Order extends Model<OrderAttributes, OrderCreationAttributes> implements O
     public readonly updatedAt!: Date;
 
     public static associate() {
-        // Define association here
         Order.belongsTo(Client, { foreignKey: 'idClient' });
         Order.belongsTo(Service, { foreignKey: 'idService' });
+        Order.hasMany(Task, { foreignKey: 'idOrder' });
+
         Client.hasMany(Order, { foreignKey: 'idClient' });
+
+        Task.belongsTo(Order, { foreignKey: 'idOrder' });
     }
 }
 
@@ -51,14 +57,7 @@ Order.init(
             autoIncrement: true,
             primaryKey: true,
         },
-        idClient: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            references: {
-                model: Client,
-                key: 'id',
-            }
-        },
+
         idService: {
             type: DataTypes.INTEGER,
             allowNull: false,

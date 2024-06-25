@@ -3,6 +3,7 @@ import Order from '../models/Order'
 import Service from '@backend/models/Service';
 import Client from '@backend/models/Client';
 import { OrderStatus } from '@backend/enums/OrderStatus';
+import Task from '@backend/models/Task';
 
 class OrderDAO {
   static async findAll(
@@ -63,19 +64,30 @@ class OrderDAO {
   }
 
   static async findById(id: number): Promise<Order | null> {
-    return await Order.findByPk(
+    const data = await Order.findByPk(
       id,
       {
-        raw: true,
-        nest: true,
         include: [
           {
             model: Client,
             attributes: ['id', 'name']
+          },
+          {
+            model: Task
           }
         ]
       }
-    )
+    );
+
+    if (data) {
+      // Convertendo para JSON para obter um objeto simples
+      const plainData = data.toJSON();
+      console.log(plainData);
+
+      return plainData;
+    }
+
+    return null;
   }
 
   static async findOrdersByClientId(

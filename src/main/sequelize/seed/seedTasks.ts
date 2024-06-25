@@ -4,6 +4,8 @@ import Task, { TaskAttributes } from "@backend/models/Task";
 export const seedTasks = async () => {
     try {
         const data: TaskAttributes[] = [
+            { status: TaskStatus.PENDENTE, description: 'Conceitos básicos do marketing', idOrder: 1},
+            { status: TaskStatus.PENDENTE, description: 'Conceitos do marketing digital', idOrder: 1},
             { status: TaskStatus.PENDENTE, description: 'Definir estratégias de marketing', idOrder: 1},
             { status: TaskStatus.PENDENTE, description: 'Realizar análise de mercado', idOrder: 1},
             { status: TaskStatus.PENDENTE, description: 'Desenvolver campanha publicitária', idOrder: 2},
