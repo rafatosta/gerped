@@ -1,9 +1,10 @@
-import { Op } from 'sequelize'
+import { Op, Transaction } from 'sequelize'
 import Order from '../models/Order'
 import Service from '@backend/models/Service';
 import Client from '@backend/models/Client';
 import { OrderStatus } from '@backend/enums/OrderStatus';
 import Task from '@backend/models/Task';
+import sequelize from '@backend/db';
 
 class OrderDAO {
   static async findAll(
@@ -81,10 +82,7 @@ class OrderDAO {
 
     if (data) {
       // Convertendo para JSON para obter um objeto simples
-      const plainData = data.toJSON();
-      console.log(plainData);
-
-      return plainData;
+      return data.toJSON() as Order;
     }
 
     return null;
@@ -140,20 +138,55 @@ class OrderDAO {
   }
 
   static async save(data: Order): Promise<Order | null> {
-    if (data.id) {
-      await OrderDAO.update(data.id, data)
-      return OrderDAO.findById(data.id)
+    const transaction = await sequelize.transaction();
+    try {
+      let order: Order;
+
+      if (data.id) {
+        order = await OrderDAO.update(data.id, data, transaction);
+      } else {
+        order = await OrderDAO.create(data, transaction);
+      }
+
+      await transaction.commit();
+      return order;
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
+  }
+
+  static async create(data: Order, transaction: Transaction): Promise<Order> {
+    const order = await Order.create(data, { transaction });
+
+    if (data.Tasks && data.Tasks.length > 0) {
+      for (const task of data.Tasks) {
+        await Task.create({ ...task, idOrder: order.id }, { transaction });
+      }
     }
 
-    return await OrderDAO.create(data)
+    return order;
   }
 
-  static async create(data: Order): Promise<Order> {
-    return await Order.create(data, { raw: true })
-  }
+  static async update(id: number, data: Partial<Order>, transaction: Transaction): Promise<Order> {
+    const [updateCount] = await Order.update(data, { where: { id }, transaction });
 
-  static async update(id: number, data: Partial<Order>): Promise<[number]> {
-    return await Order.update(data, { where: { id } })
+    if (updateCount === 0) {
+      throw new Error(`Order with id ${id} not found`);
+    }
+
+    await Task.destroy({ where: { idOrder: id }, transaction });
+    if (data.Tasks && data.Tasks.length > 0) {
+      await Task.bulkCreate(data.Tasks, { transaction });
+    }
+
+    const updatedOrder = await Order.findByPk(id, { include: [Client, Task], transaction });
+
+    if (!updatedOrder) {
+      throw new Error(`Order with id ${id} not found after update`);
+    }
+
+    return updatedOrder.toJSON() as Order;
   }
 
   static async delete(id: number): Promise<number> {

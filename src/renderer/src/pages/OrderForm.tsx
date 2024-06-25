@@ -103,7 +103,7 @@ function OrderForm() {
         if (newTask.trim()) {
             console.log(newTask);
             const updateTasks = [...(order.Tasks ?? [])];
-            const createNewTask = { description: newTask, status: TaskStatus.PENDENTE } as Task
+            const createNewTask = { description: newTask, status: TaskStatus.PENDENTE, idOrder: order.id } as Task
             console.log(createNewTask);
             setOrder((prevOrder) => ({ ...prevOrder, Tasks: [...updateTasks, createNewTask] } as Order));
 
