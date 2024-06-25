@@ -1,13 +1,16 @@
 import { OrderStatus } from "@backend/enums/OrderStatus";
+import { TaskStatus } from "@backend/enums/TaskStatus";
 import Order from "@backend/models/Order";
+import Task from "@backend/models/Task";
 import Container from "@renderer/components/Container";
 import FloatingSelect from "@renderer/components/FloatingSelect";
+import GenericTable from "@renderer/components/GenericTable";
 import Title from "@renderer/components/Title";
 import { useClient } from "@renderer/hooks/useClient";
 import { useOrder } from "@renderer/hooks/useOrder";
 import { useService } from "@renderer/hooks/useService";
 import formatDate from "@renderer/utils/formatDate";
-import { Button, FloatingLabel } from "flowbite-react";
+import { Button, Checkbox, FloatingLabel, Label } from "flowbite-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -25,38 +28,30 @@ function OrderForm() {
         deliveryDate: new Date(),
         price: 0,
         status: OrderStatus.ATIVO,
-
     } as Order)
+
+    const [newTask, setNewTask] = useState<string>('')
 
     const { data: dataService } = useService()
     const { save, findById } = useOrder()
     const { data: dataClient } = useClient()
 
+    const fetchOrder = async (orderId: string): Promise<Order> => {
+        return await findById(orderId);
+    }
+
     useEffect(() => {
-        console.log('order:', orderId, 'client:', clientId);
-        console.log(dataService);
-
-        if (orderId) {
-            console.log('Buscar Order id:', orderId);
-            const fetchOrder = async (): Promise<Order> => {
-                return await findById(orderId);
-            }
-
-            fetchOrder()
+        if (orderId) { // Buscar Order pelo ID
+            fetchOrder(orderId)
                 .then(data => {
-                    console.log(data);
                     setOrder(data)
                 })
-                .catch(error => {
-                    console.error('Erro ao buscar order:', error);
-                });
-        } else if (clientId) {
-            console.log('bucar cliente apenas');
+
+        } else if (clientId) { // Definir o ID do cliente em nova Order
             setOrder((prevOrder) => ({
                 ...prevOrder,
                 idClient: parseInt(clientId)
             } as Order))
-
         }
 
     }, [orderId, clientId])
@@ -77,6 +72,87 @@ function OrderForm() {
         save(order)
         navigate(-1)
     }
+
+    const handleTaskStatusChange = (index: number) => {
+        const updateTasks = [...(order.Tasks ?? [])];
+        const updatedStatus =
+            updateTasks[index].status === TaskStatus.FINALIZADO
+                ? TaskStatus.PENDENTE
+                : TaskStatus.FINALIZADO;
+        const updateConclusionDate = updateTasks[index].status === TaskStatus.FINALIZADO
+            ? ""
+            : new Date();
+
+        updateTasks[index] = { ...updateTasks[index], status: updatedStatus, conclusionDate: updateConclusionDate } as Task;
+        setOrder((prevOrder) => ({ ...prevOrder, Tasks: updateTasks } as Order));
+    };
+
+    const handleTaskDescriptionChange = (index: number, description: string) => {
+        const updateTasks = [...(order.Tasks ?? [])];
+        updateTasks[index] = { ...updateTasks[index], description } as Task
+        setOrder((prevOrder) => ({ ...prevOrder, Tasks: updateTasks } as Order));
+    }
+
+    const handleTaskDelete = (index: number) => {
+        const updateTasks = [...(order.Tasks ?? [])];
+        updateTasks.splice(index, 1)
+        setOrder((prevOrder) => ({ ...prevOrder, Tasks: updateTasks } as Order));
+    }
+
+    const createTask = () => {
+        if (newTask.trim()) {
+            console.log(newTask);
+            const updateTasks = [...(order.Tasks ?? [])];
+            const createNewTask = { description: newTask, status: TaskStatus.PENDENTE } as Task
+            console.log(createNewTask);
+            setOrder((prevOrder) => ({ ...prevOrder, Tasks: [...updateTasks, createNewTask] } as Order));
+
+            setNewTask('')
+        }
+    }
+
+    const columns = [
+        {
+            header: 'Situação',
+            accessor: (data: Task, index: number) => (
+                <div className="flex justify-start items-center gap-2">
+                    <Checkbox
+                        id={`task-${index}`}
+                        checked={data.status === TaskStatus.FINALIZADO}
+                        onChange={() => handleTaskStatusChange(index)}
+                    />
+                    <Label htmlFor={`task-${index}`}>
+                        {TaskStatus[data.status][0].toUpperCase() + TaskStatus[data.status].substring(1).toLowerCase()}
+                    </Label>
+                </div>
+            )
+        },
+        {
+            header: 'Terefa',
+            accessor: (data: Task, index: number) => (
+                <FloatingLabel
+                    variant="standard"
+                    label="Descrição"
+                    name="task"
+                    type="text"
+                    value={data.description}
+                    onChange={(e) => handleTaskDescriptionChange(index, e.target.value)}
+                />
+            )
+        },
+        {
+            header: 'Conclusão',
+            accessor: (data: Task) => data.conclusionDate ? formatDate(data.conclusionDate) : ""
+        },
+        {
+            header: 'Ações',
+            accessor: (_: Task, index: number) => (
+                <button className="font-medium text-red-600 hover:underline" onClick={() => handleTaskDelete(index)}>
+                    Excluir
+                </button>
+            )
+        }
+    ];
 
     return (
         <Container>
@@ -101,7 +177,6 @@ function OrderForm() {
                         onChange={handleChange}
                         required
                     >
-
                         {
                             dataClient.map((client) => (
                                 <option key={client.id} value={client.id}>
@@ -109,7 +184,6 @@ function OrderForm() {
                                 </option>
                             ))
                         }
-
 
                     </FloatingSelect>
 
@@ -177,27 +251,38 @@ function OrderForm() {
                         <option value={OrderStatus.FINALIZADO}>Finalizado</option>
                     </FloatingSelect>
                 </div>
-                <div className="absolute inset-x-0 bottom-0 flex justify-end gap-2 z-50 p-2">
-                    <Button color="red" onClick={() => navigate(-1)}>
-                        Cancelar
+                <div className="pl-64 ml-4 absolute inset-x-0 bottom-0 flex justify-between items-center gap-2 z-50 p-2">
+                    <Button color="yellow" onClick={() => navigate(-1)}>
+                        Excluir pedido
                     </Button>
-                    <Button type="submit">Salvar</Button>
+                    <div className="flex items-center gap-2">
+                        <Button color="red" onClick={() => navigate(-1)}>
+                            Cancelar
+                        </Button>
+                        <Button type="submit">Salvar</Button>
+                    </div>
+
                 </div>
             </form>
-
-            <div>
-                <h1>Detalhes do Pedido</h1>
-                <ul>
-                    <li><span className="label">ID:</span> {order?.id}</li>
-                    <li><span className="label">ID do Cliente:</span> {order.idClient}</li>
-                    <li><span className="label">ID do Serviço:</span> {order.idService}</li>
-                    <li><span className="label">Tema:</span> {order.theme}</li>
-                    <li><span className="label">Data do Pedido:</span> {formatDate(order.orderDate)}</li>
-                    <li><span className="label">Data de Entrega:</span> {formatDate(order.deliveryDate)}</li>
-                    <li><span className="label">Preço:</span> {order.price.toFixed(2)}</li>
-                    <li><span className="label">Status:</span> {order.status}</li>
-                </ul>
+            <Title disabled>Lista de Tarefas</Title>
+            <div className="grid grid-cols-2 items-center gap-2">
+                <FloatingLabel
+                    variant="standard"
+                    label="Nova tarefa"
+                    name="newTask"
+                    type="text"
+                    value={newTask}
+                    onChange={(e) => setNewTask(e.target.value)}
+                />
+                <Button className="w-fit"
+                    onClick={createTask}
+                >Adicionar</Button>
             </div>
+
+            {order.Tasks && (
+                <GenericTable data={order.Tasks} columns={columns} keyExtractor={(data: Task) => data.id} />
+            )}
+            <div className="h-12" />
         </Container>
     );
 }
