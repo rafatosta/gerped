@@ -2,7 +2,7 @@ import { Table } from 'flowbite-react'
 
 interface Column<T> {
   header: string
-  accessor: (item: T) => React.ReactNode
+  accessor: (item: T, index:number) => React.ReactNode
   className?: string
 }
 
@@ -22,11 +22,11 @@ function GenericTable<T>({ data, columns, keyExtractor }: GenericTableProps<T>) 
           ))}
         </Table.Head>
         <Table.Body className="divide-y overflow-y-auto">
-          {data.map((item) => (
+          {data.map((item, i) => (
             <Table.Row key={keyExtractor(item)} className="bg-white">
               {columns.map((column, index) => (
                 <Table.Cell key={index} className={column.className}>
-                  {column.accessor(item)}
+                  {column.accessor(item, i)}
                 </Table.Cell>
               ))}
             </Table.Row>
