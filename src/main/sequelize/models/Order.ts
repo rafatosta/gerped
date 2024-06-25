@@ -40,13 +40,18 @@ class Order extends Model<OrderAttributes, OrderCreationAttributes> implements O
     public readonly updatedAt!: Date;
 
     public static associate() {
-        Order.belongsTo(Client, { foreignKey: 'idClient' });
-        Order.belongsTo(Service, { foreignKey: 'idService' });
-        Order.hasMany(Task, { foreignKey: 'idOrder' });
+        // Regras de associação com restrição para Client e Service
+        Order.belongsTo(Client, { foreignKey: 'idClient', onDelete: 'RESTRICT', onUpdate: 'CASCADE' });
+        Order.belongsTo(Service, { foreignKey: 'idService', onDelete: 'RESTRICT', onUpdate: 'CASCADE' });
 
-        Client.hasMany(Order, { foreignKey: 'idClient' });
+        // Regra de cascata para remover Tasks ao remover Order
+        Order.hasMany(Task, { foreignKey: 'idOrder', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
 
-        Task.belongsTo(Order, { foreignKey: 'idOrder' });
+        Client.hasMany(Order, { foreignKey: 'idClient', onDelete: 'RESTRICT', onUpdate: 'CASCADE' });
+        Service.hasMany(Order, { foreignKey: 'idService', onDelete: 'RESTRICT', onUpdate: 'CASCADE' });
+
+        Task.belongsTo(Order, { foreignKey: 'idOrder', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+
     }
 }
 
