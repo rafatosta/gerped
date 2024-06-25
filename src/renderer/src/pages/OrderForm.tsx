@@ -33,7 +33,7 @@ function OrderForm() {
     const [newTask, setNewTask] = useState<string>('')
 
     const { data: dataService } = useService()
-    const { save, findById } = useOrder()
+    const { save, findById, remove } = useOrder()
     const { data: dataClient } = useClient()
 
     const fetchOrder = async (orderId: string): Promise<Order> => {
@@ -66,6 +66,13 @@ function OrderForm() {
         } as Order));
 
     };
+
+    const handleRemoveOrder = async () => {
+        
+        remove(order.id)
+        navigate(-1)
+    }
+
 
     const handleSave = async () => {
         console.log(order)
@@ -252,7 +259,7 @@ function OrderForm() {
                     </FloatingSelect>
                 </div>
                 <div className="pl-64 ml-4 absolute inset-x-0 bottom-0 flex justify-between items-center gap-2 z-50 p-2">
-                    <Button color="yellow" onClick={() => navigate(-1)}>
+                    <Button color="yellow" onClick={handleRemoveOrder}>
                         Excluir pedido
                     </Button>
                     <div className="flex items-center gap-2">
