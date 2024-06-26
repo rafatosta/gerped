@@ -62,7 +62,7 @@ function AlertError({ appError, onClose }: IAlertError) {
             <div className="flex justify-between items-center">
                 <div className="text-md font-semibold">
                     {appError?.details?.name == "SequelizeForeignKeyConstraintError" ?
-                        "Cliente com Pedidos cadastrados"
+                        "Não é possível remover o item, pois há dados associados."
                         :
                         ""}
                 </div>
