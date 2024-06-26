@@ -1,5 +1,5 @@
 import Order from '@backend/models/Order';
-import { useBackendEntity } from './useBackendEntity';
+import { parseError, useBackendEntity } from './useBackendEntity';
 import { OrderStatus } from '@backend/enums/OrderStatus';
 import { useCallback, useState } from 'react';
 
@@ -55,7 +55,7 @@ export function useOrder(searchText?: string, currentPage?: number, filterStatus
         setDataOrdersByClient(data); // Atualiza os dados com os resultados de findOrdersByClientIdFromIPC
         setCountOrdersByClient(count); // Atualiza a contagem com os resultados de findOrdersByClientIdFromIPC
       } catch (err) {
-        console.log('Erro:', err);
+        throw parseError(err);
       }
     },
     [dataOrdersByClient, countOrdersByClient] // Inclui setData e setCount como dependências

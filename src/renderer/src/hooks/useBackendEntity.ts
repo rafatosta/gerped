@@ -1,4 +1,17 @@
+import { IAppError } from '@backend/interface/IAppError';
 import { useCallback, useEffect, useState } from 'react';
+
+// Função para converter erro em um formato válido para o front
+export function parseError(err: unknown): IAppError {
+  const e = err as Error;
+  const match = e.message.match(/Error: (.*)$/);
+  const errorMessage = match ? match[1] : 'Ocorreu um erro desconhecido.';
+  try {
+    return JSON.parse(errorMessage) as IAppError;
+  } catch {
+    return { message: errorMessage };
+  }
+}
 
 export function useBackendEntity<T>(
   findAll: (...args: any[]) => Promise<{ data: T[]; count: number }>,
@@ -13,13 +26,13 @@ export function useBackendEntity<T>(
   const [count, setCount] = useState<number>(0);
 
   const fetchData = useCallback(async () => {
-      try {
-        const { data, count } = await findAll(searchText, currentPage, ...extraParams);
-        setCount(count);
-        setData(data);
-      } catch (err) {
-        console.log('Erro:', err);
-      }
+    try {
+      const { data, count } = await findAll(searchText, currentPage, ...extraParams);
+      setCount(count);
+      setData(data);
+    } catch (err) {
+      throw parseError(err);
+    }
   }, [searchText, currentPage, findAll, ...extraParams]);
 
   const saveData = useCallback(
@@ -29,9 +42,8 @@ export function useBackendEntity<T>(
         fetchData();
         return resData;
       } catch (err) {
-        alert(`Erro: ${err}`);
+        throw parseError(err);
       }
-      return {} as T;
     },
     [fetchData, save]
   );
@@ -41,10 +53,11 @@ export function useBackendEntity<T>(
       try {
         return await findById(id);
       } catch (err) {
-        alert(`Erro: ${err}`);
+        throw parseError(err);
       }
-      return {} as T;
-    }, [findById]);
+    },
+    [findById]
+  );
 
   const removeData = useCallback(
     async (id: number): Promise<T> => {
@@ -53,13 +66,14 @@ export function useBackendEntity<T>(
         fetchData();
         return resData;
       } catch (err) {
-        alert(`Erro: ${err}`);
+        throw parseError(err);
       }
-      return {} as T;
-    }, [fetchData, remove]);
+    },
+    [fetchData, remove]
+  );
 
   useEffect(() => {
-      fetchData();
+    fetchData();
   }, [fetchData, searchText, currentPage]);
 
   return { data, count, save: saveData, findById: findByIdData, remove: removeData, setData, setCount };
