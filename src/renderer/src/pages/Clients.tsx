@@ -1,20 +1,48 @@
-import Client from '@backend/models/Client' // Importa o modelo de Cliente do backend
-import ClientFormModal from '@renderer/components/ClientFormModal' // Importa o modal de formulário de Cliente
-import Container from '@renderer/components/Container' // Importa o componente de Container
-import GenericTable from '@renderer/components/GenericTable' // Importa o componente de tabela genérica
-import PaginationControls from '@renderer/components/PaginationControls' // Importa os controles de paginação
-import Title from '@renderer/components/Title' // Importa o componente de título
-import { useClient } from '@renderer/hooks/useClient' // Importa o hook personalizado useClient para operações relacionadas a Clientes
-import { formatPhoneNumber } from '@renderer/utils/formatPhoneNumber' // Importa a função utilitária para formatar números de telefone
-import { FloatingLabel } from 'flowbite-react' // Importa o componente FloatingLabel do pacote flowbite-react
-import { useState } from 'react' // Importa o hook useState do React
-import { Link } from 'react-router-dom' // Importa o componente Link do React Router
+import { IAppError } from '@backend/interface/IAppError'
+import Client from '@backend/models/Client'
+import AlertError from '@renderer/components/AlertError'
+import ClientFormModal from '@renderer/components/ClientFormModal'
+import Container from '@renderer/components/Container'
+import GenericTable from '@renderer/components/GenericTable'
+import PaginationControls from '@renderer/components/PaginationControls'
+import Title from '@renderer/components/Title'
+import ClientIPC from '@renderer/ipc/ClientIPC'
+import { formatPhoneNumber } from '@renderer/utils/formatPhoneNumber'
+import { FloatingLabel } from 'flowbite-react'
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 
 function Clients() {
   const [currentPage, setCurrentPage] = useState<number>(1) // Estado para controlar a página atual da lista de Clientes
   const [searchText, setSearchText] = useState<string>('') // Estado para armazenar o texto de busca na lista de Clientes
 
-  const { data, count, save } = useClient(searchText, currentPage) // Desestruturação do retorno do hook useClient para obter dados, contagem e função de salvamento
+  const [data, setData] = useState<Client[]>([])
+  const [count, setCount] = useState<number>(0);
+
+  const [error, setError] = useState<IAppError | null>(null)
+
+  // Carregar a lista de clientes do banco de dados
+  const fetchData = async () => {
+    ClientIPC.findAll(searchText, currentPage).then((res) => {
+      setData(res.data)
+      setCount(res.count)
+      setError(null);
+    }).catch((err: IAppError) => {
+      setError(err)
+    })
+  };
+
+  useEffect(() => {
+    fetchData()
+  }, [searchText, currentPage]);
+
+
+  // Função para recarregar a lista de cliente após novo cliente
+  const onSaveClient = () => {
+    setSearchText("")
+    setCurrentPage(1)
+    fetchData()
+  }
 
   // Função para atualizar a página atual da lista de Clientes
   const onPageChange = (page: number) => setCurrentPage(page)
@@ -50,6 +78,9 @@ function Clients() {
       {/* Título da página */}
       <Title disabled>Clientes</Title>
 
+      {/* Exibe alerta de erro, se houver */}
+      <AlertError appError={error} onClose={() => setError(null)} />
+
       {/* Barra de busca e botão para abrir modal de formulário de Cliente */}
       <div className="grid grid-cols-3 items-start gap-x-4">
         <div className="col-span-2">
@@ -64,7 +95,7 @@ function Clients() {
 
         <div className="flex justify-end">
           {/* Modal de formulário para adicionar novo Cliente */}
-          <ClientFormModal saveCliente={save} />
+          <ClientFormModal onSave={onSaveClient} setError={setError} />
         </div>
       </div>
 

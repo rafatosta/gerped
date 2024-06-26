@@ -3,12 +3,15 @@ import { Button, FloatingLabel, Modal } from 'flowbite-react'
 import { FormEvent, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import InputMask from 'react-input-mask'
+import ClientIPC from '@renderer/ipc/ClientIPC'
+import { IAppError } from '@backend/interface/IAppError'
 
 interface IClienteFormDialog {
-  saveCliente: (cliente: Client) => Promise<Client>
+  onSave: () => void
+  setError: any
 }
 
-function ClientFormModal({ saveCliente }: IClienteFormDialog) {
+function ClientFormModal({ onSave, setError }: IClienteFormDialog) {
   const [openModal, setOpenModal] = useState(false)
   const nameInputRef = useRef<HTMLInputElement>(null)
 
@@ -36,17 +39,19 @@ function ClientFormModal({ saveCliente }: IClienteFormDialog) {
     const submitter = (e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement
     const buttonName = submitter.name
 
-    try {
-      const novoCliente = await saveCliente(client)
+    ClientIPC.save(client)
+      .then((newClient) => {
 
-      if (buttonName === 'btnCreateOrder') {
-        navigate(`/orders/create/${novoCliente.id}`);
-      }
+        if (buttonName === 'btnCreateOrder') {
+          navigate(`/orders/create/${newClient.id}`);
+        } else {
+          onSave()
+        }
+      }).catch((err: IAppError) => {
+        setError(err)
+      })
 
-      onCloseModal()
-    } catch (error) {
-      alert(`Erro ao salvar cliente:${error}`)
-    }
+    onCloseModal()
   }
 
   const onCloseModal = () => {
