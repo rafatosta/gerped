@@ -16,7 +16,7 @@ function GenericTable<T>({ data, columns, keyExtractor }: GenericTableProps<T>) 
   return (
     <div className="overflow-y-auto shadow-sm">
       <Table hoverable>
-        <Table.Head className="sticky top-0 z-50">
+        <Table.Head className="sticky top-0 z-40">
           {columns.map((column, index) => (
             <Table.HeadCell key={index}>{column.header}</Table.HeadCell>
           ))}
