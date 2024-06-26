@@ -6,7 +6,7 @@ interface IServiceFormModal {
     isOpen: boolean;
     editMode: boolean;
     onClose: () => void;
-    onSave: (data: Service) => Promise<Service>;
+    onSave: (data: Service) => void;
     service?: Service | null;
 }
 
