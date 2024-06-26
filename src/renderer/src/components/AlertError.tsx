@@ -60,14 +60,14 @@ function AlertError({ appError, onClose }: IAlertError) {
     const ExampleAdditionalContent = () => {
         return (
             <>
-                <div className="text-md font-semibold pb-2">
+                <div className="text-md font-semibold">
                     {appError?.details?.name == "SequelizeForeignKeyConstraintError" ?
                         "Cliente com Pedidos cadastrados"
                         :
                         ""}
                 </div>
 
-                <div className="flex">
+                {appError?.details?.name && <div className="flex">
                     <button
                         type="button"
                         className="mr-2 inline-flex items-center rounded-lg bg-cyan-700 px-3 py-1.5 text-center text-xs font-medium text-white hover:bg-cyan-800 focus:ring-4 focus:ring-cyan-300 dark:bg-cyan-800 dark:hover:bg-cyan-900"
@@ -78,7 +78,7 @@ function AlertError({ appError, onClose }: IAlertError) {
                         Detalhes
                     </button>
 
-                </div>
+                </div>}
             </>
         );
     }
