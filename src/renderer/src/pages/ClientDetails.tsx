@@ -1,4 +1,4 @@
-import { Alert, Badge, Button, Dropdown, FloatingLabel, Label, Tabs, TextInput } from 'flowbite-react'
+import { Badge, Button, Dropdown, FloatingLabel } from 'flowbite-react'
 import { FormEvent, useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 
@@ -16,20 +16,18 @@ import PaginationControls from '@renderer/components/PaginationControls'
 import { IAppError } from '@backend/interface/IAppError'
 import AlertError from '@renderer/components/AlertError'
 
-
 function ClienteDetails() {
-  const { id } = useParams<{ id: string }>()
+  const { id } = useParams<{ id: string }>() // Obtém o parâmetro de rota 'id'
+  const navigate = useNavigate() // Hook de navegação do React Router
 
-  const navigate = useNavigate()
+  const [error, setError] = useState<IAppError | null>(null) // Estado para armazenar erros
 
-  const [error, setError] = useState<IAppError | null>(null)
+  const [currentPage, setCurrentPage] = useState<number>(1) // Estado para controlar a página atual dos pedidos
+  const [searchText, setSearchText] = useState<string>('') // Estado para o texto de busca na lista de pedidos
+  const [filterStatus, setFilterStatus] = useState<OrderStatus>(OrderStatus.ATIVO); // Estado para o status de filtro dos pedidos
 
-  const [currentPage, setCurrentPage] = useState<number>(1)
-  const [searchText, setSearchText] = useState<string>('')
-  const [filterStatus, setFilterStatus] = useState<OrderStatus>(OrderStatus.ATIVO);
-
-  const [buttonUpEnable, setButtonUpEnable] = useState(true)
-  const [client, setClient] = useState<Client>({
+  const [buttonUpEnable, setButtonUpEnable] = useState(true) // Estado para controlar o estado do botão 'Atualizar'
+  const [client, setClient] = useState<Client>({ // Estado para armazenar informações do cliente
     name: '',
     phone: '',
     email: '',
@@ -37,13 +35,17 @@ function ClienteDetails() {
     institute: ''
   } as Client)
 
-  const { save, findById, remove } = useClient()
-  const { dataOrdersByClient, countOrdersByClient, findOrdersByClientId } = useOrder()
+  const { save, findById, remove } = useClient() // Utiliza o hook personalizado 'useClient' para operações CRUD de clientes
+  const { dataOrdersByClient, countOrdersByClient, findOrdersByClientId } = useOrder() // Utiliza o hook personalizado 'useOrder' para obter dados dos pedidos
 
+  // Função para mudar a página atual dos pedidos
   const onPageChange = (page: number) => setCurrentPage(page)
+
+  // Função para atualizar o texto de busca na lista de pedidos
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) =>
     setSearchText(event.target.value)
 
+  // Efeito para carregar dados do cliente baseado no 'id' da rota
   useEffect(() => {
     if (id) {
       findById(id)
@@ -53,45 +55,50 @@ function ClienteDetails() {
     }
   }, [id])
 
+  // Efeito para atualizar a lista de pedidos baseado em mudanças de página, texto de busca ou status de filtro
   useEffect(() => {
     if (id) {
       findOrdersByClientId(id, searchText, currentPage, filterStatus)
     }
   }, [currentPage, searchText, filterStatus])
 
+  // Função para atualizar campos do formulário de cliente
   const handleInputChange = (field: keyof Client) => (e: React.ChangeEvent<HTMLInputElement>) => {
     if (field === 'phone') {
-      const value = e.target.value.replace(/\D/g, '') // Remove caracteres não numéricos
+      const value = e.target.value.replace(/\D/g, '') // Remove caracteres não numéricos do campo de telefone
       setClient({ ...client, [field]: value } as Client)
     } else {
       setClient({ ...client, [field]: e.target.value } as Client)
     }
-    setButtonUpEnable(false)
+    setButtonUpEnable(false) // Habilita o botão 'Atualizar'
   }
 
+  // Função assíncrona para lidar com o envio do formulário de cliente
   const handleSubmit = useCallback(
     async (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault()
 
       save(client).then(() => {
-        setButtonUpEnable(true)
+        setButtonUpEnable(true) // Após salvar, habilita o botão 'Atualizar'
       }).catch((err: IAppError) => {
-        setError(err)
+        setError(err) // Em caso de erro, define o estado de erro
       })
     },
     [client, save]
   )
 
+  // Função assíncrona para lidar com a exclusão do cliente
   const handleDelete = useCallback(async () => {
     if (client.id) {
       remove(client.id).then(() => {
-        navigate('/clients')
+        navigate('/clients') // Após excluir, navega para a lista de clientes
       }).catch((err: IAppError) => {
-        setError(err)
+        setError(err) // Em caso de erro, define o estado de erro
       })
     }
   }, [client.id, remove, navigate])
 
+  // Configuração das colunas da tabela de pedidos
   const columns = [
     {
       header: 'Tema',
@@ -111,7 +118,7 @@ function ClienteDetails() {
       header: 'Situação',
       accessor: (data: Order) => (
         <Badge color={data.status == OrderStatus.ATIVO ? "warning" : "success"} className="flex justify-center items-center">
-          {OrderStatus[data.status]}
+          {OrderStatus[data.status]} {/* Exibe o status do pedido com base no enum OrderStatus */}
         </Badge>
       ),
     },
@@ -132,9 +139,11 @@ function ClienteDetails() {
         <p className="text-gray-400 italic text-lg">#{client.id}</p>
       </div>
 
+      {/* Exibe alerta de erro, se houver */}
       <AlertError appError={error} onClose={() => setError(null)} />
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-1">
+        {/* Campos editáveis do formulário de cliente */}
         <FloatingLabel
           variant="filled"
           label="Nome"
@@ -163,7 +172,7 @@ function ClienteDetails() {
             <FloatingLabel
               variant="filled"
               className="col-span-2"
-              label="Email (Opicional)"
+              label="Email (Opcional)"
               type="email"
               value={client.email}
               onChange={handleInputChange('email')}
@@ -173,20 +182,21 @@ function ClienteDetails() {
         <div className="grid grid-cols-2 gap-2">
           <FloatingLabel
             variant="filled"
-            label="Curso (Opicional)"
+            label="Curso (Opcional)"
             type="text"
             value={client.course}
             onChange={handleInputChange('course')}
           />
           <FloatingLabel
             variant="filled"
-            label="Instituto (Opicional)"
+            label="Instituto (Opcional)"
             type="text"
             value={client.institute}
             onChange={handleInputChange('institute')}
           />
         </div>
         <div className="flex justify-between items-center py-4">
+          {/* Botões para excluir e atualizar o cliente */}
           <Button color="red" onClick={handleDelete}>
             Excluir
           </Button>
@@ -197,7 +207,8 @@ function ClienteDetails() {
       </form>
       <Title disabled>Lista de Pedidos</Title>
       <div className="grid grid-cols-3 items-start gap-x-4">
-        <div >
+        <div>
+          {/* Campo de busca na lista de pedidos */}
           <FloatingLabel
             variant="standard"
             label="Buscar"
@@ -206,8 +217,9 @@ function ClienteDetails() {
             onChange={handleSearch}
           />
         </div>
-        <div className="flex items-center gap-x-4">
+        <div className="flex items-center gap-x-4 z-50">
           <p>Filtrar por:</p>
+          {/* Dropdown para filtrar por status de pedido */}
           <Dropdown color="gray" label={filterStatus ? OrderStatus[filterStatus] : "TODOS"}>
             <Dropdown.Item onClick={() => setFilterStatus(OrderStatus.ATIVO)}>ATIVO</Dropdown.Item>
             <Dropdown.Item onClick={() => setFilterStatus(OrderStatus.FINALIZADO)}>FINALIZADO</Dropdown.Item>
@@ -215,10 +227,13 @@ function ClienteDetails() {
           </Dropdown>
         </div>
         <div className="flex justify-end">
+          {/* Botão para adicionar novo pedido */}
           <Button onClick={() => navigate(`/orders/create/${client.id}`)}>Novo</Button>
         </div>
       </div>
+      {/* Tabela de pedidos */}
       <GenericTable data={dataOrdersByClient} columns={columns} keyExtractor={(data: Order) => data.id} />
+      {/* Controla a paginação da tabela de pedidos */}
       <PaginationControls
         currentPage={currentPage}
         totalRecords={countOrdersByClient}
