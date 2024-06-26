@@ -36,13 +36,9 @@ function OrderForm() {
     const { save, findById, remove } = useOrder()
     const { data: dataClient } = useClient()
 
-    const fetchOrder = async (orderId: string): Promise<Order> => {
-        return await findById(orderId);
-    }
-
     useEffect(() => {
         if (orderId) { // Buscar Order pelo ID
-            fetchOrder(orderId)
+            findById(orderId)
                 .then(data => {
                     setOrder(data)
                 })

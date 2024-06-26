@@ -38,7 +38,7 @@ export function useOrder(searchText?: string, currentPage?: number, filterStatus
   const [countOrdersByClient, setCountOrdersByClient] = useState<number>(0);
 
 
-  const { data, count, save, findById, remove, setData, setCount } = useBackendEntity<Order>(
+  const { data, count, save, findById, remove } = useBackendEntity<Order>(
     findAllFromIPC,
     findByIdFromIPC,
     saveFromIPC,

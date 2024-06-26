@@ -41,23 +41,16 @@ function ClienteDetails() {
     setSearchText(event.target.value)
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (id) {
-        try {
-          const res = await findById(id)
-          setClient(res)
-        } catch (error) {
-          console.error('Error fetching Cliente:', error)
-        }
-      } else {
-        console.error('ID is undefined')
-      }
+    if (id) {
+      findById(id)
+        .then(data => {
+          setClient(data)
+        })
     }
-    fetchData()
   }, [id])
 
   useEffect(() => {
-    if (id) { 
+    if (id) {
       findOrdersByClientId(id, searchText, currentPage, filterStatus)
     }
   }, [currentPage, searchText, filterStatus])
