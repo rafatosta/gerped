@@ -1,7 +1,6 @@
 import { Badge, Button, Dropdown, FloatingLabel } from 'flowbite-react'
 import { FormEvent, useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-
 import Title from '@renderer/components/Title'
 import InputMask from 'react-input-mask'
 import Client from '@backend/models/Client'
@@ -10,11 +9,11 @@ import GenericTable from '@renderer/components/GenericTable'
 import Order from '@backend/models/Order'
 import { OrderStatus } from '@backend/enums/OrderStatus'
 import formatDate from '@renderer/utils/formatDate'
-import { useOrder } from '@renderer/hooks/useOrder'
 import PaginationControls from '@renderer/components/PaginationControls'
 import { IAppError } from '@backend/interface/IAppError'
 import AlertError from '@renderer/components/AlertError'
 import ClientIPC from '@renderer/ipc/ClientIPC'
+import OrderIPC from '@renderer/ipc/OrderIPC'
 
 function ClienteDetails() {
   const { id } = useParams<{ id: string }>() // Obtém o parâmetro de rota 'id'
@@ -35,8 +34,9 @@ function ClienteDetails() {
     institute: ''
   } as Client)
 
-  const { dataOrdersByClient, countOrdersByClient, findOrdersByClientId } = useOrder() // Utiliza o hook personalizado 'useOrder' para obter dados dos pedidos
-
+  const [data, setData] = useState<Order[]>([])
+  const [count, setCount] = useState<number>(0);
+  
   // Função para mudar a página atual dos pedidos
   const onPageChange = (page: number) => setCurrentPage(page)
 
@@ -57,7 +57,15 @@ function ClienteDetails() {
   // Efeito para atualizar a lista de pedidos baseado em mudanças de página, texto de busca ou status de filtro
   useEffect(() => {
     if (id) {
-      findOrdersByClientId(id, searchText, currentPage, filterStatus)
+      OrderIPC.findOrdersByClientId(id, searchText, currentPage, filterStatus)
+        .then((res) => {
+          setData(res.data)
+          setCount(res.count)
+          setError(null);
+        })
+        .catch((err: IAppError) => {
+          setError(err)
+        })
     }
   }, [currentPage, searchText, filterStatus])
 
@@ -83,7 +91,6 @@ function ClienteDetails() {
     })
   }
 
-
   // Função assíncrona para lidar com a exclusão do cliente
   const handleDelete = async () => {
     if (client.id) {
@@ -95,150 +102,149 @@ function ClienteDetails() {
     }
   }
 
-
-    // Configuração das colunas da tabela de pedidos
-    const columns = [
-      {
-        header: 'Tema',
-        accessor: (data: Order) => (
-          <div>
-            {data.theme}
-            <p className="text-xs text-gray-500">{data.Service.description}</p>
-          </div>
-        ),
-        className: 'whitespace-nowrap font-medium text-gray-900'
-      },
-      {
-        header: 'Entrega',
-        accessor: (data: Order) => formatDate(data.deliveryDate)
-      },
-      {
-        header: 'Situação',
-        accessor: (data: Order) => (
-          <Badge color={data.status == OrderStatus.ATIVO ? "warning" : "success"} className="flex justify-center items-center">
-            {OrderStatus[data.status]} {/* Exibe o status do pedido com base no enum OrderStatus */}
-          </Badge>
-        ),
-      },
-      {
-        header: 'Ações',
-        accessor: (data: Order) => (
-          <Link to={`/orders/${data.id}`} className="font-medium text-cyan-600 hover:underline">
-            Visualizar
-          </Link>
-        )
-      }
-    ];
-
-    return (
-      <Container>
-        <div className="flex justify-between items-center gap-4">
-          <Title>Detalhe do cliente</Title>
-          <p className="text-gray-400 italic text-lg">#{client.id}</p>
+  // Configuração das colunas da tabela de pedidos
+  const columns = [
+    {
+      header: 'Tema',
+      accessor: (data: Order) => (
+        <div>
+          {data.theme}
+          <p className="text-xs text-gray-500">{data.Service.description}</p>
         </div>
+      ),
+      className: 'whitespace-nowrap font-medium text-gray-900'
+    },
+    {
+      header: 'Entrega',
+      accessor: (data: Order) => formatDate(data.deliveryDate)
+    },
+    {
+      header: 'Situação',
+      accessor: (data: Order) => (
+        <Badge color={data.status == OrderStatus.ATIVO ? "warning" : "success"} className="flex justify-center items-center">
+          {OrderStatus[data.status]} {/* Exibe o status do pedido com base no enum OrderStatus */}
+        </Badge>
+      ),
+    },
+    {
+      header: 'Ações',
+      accessor: (data: Order) => (
+        <Link to={`/orders/${data.id}`} className="font-medium text-cyan-600 hover:underline">
+          Visualizar
+        </Link>
+      )
+    }
+  ];
 
-        {/* Exibe alerta de erro, se houver */}
-        <AlertError appError={error} onClose={() => setError(null)} />
+  return (
+    <Container>
+      <div className="flex justify-between items-center gap-4">
+        <Title>Detalhe do cliente</Title>
+        <p className="text-gray-400 italic text-lg">#{client.id}</p>
+      </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-1">
-          {/* Campos editáveis do formulário de cliente */}
-          <FloatingLabel
-            variant="filled"
-            label="Nome"
-            type="text"
-            value={client.name}
-            onChange={handleInputChange('name')}
-            required
-          />
-          <div className="grid grid-cols-3 gap-2">
-            <InputMask
-              mask="(99) 99999-9999"
-              value={client.phone}
-              onChange={handleInputChange('phone')}
-            >
-              {(inputProps: any) => (
-                <FloatingLabel
-                  variant="filled"
-                  {...inputProps}
-                  label="Telefone"
-                  value={client.phone}
-                  required
-                />
-              )}
-            </InputMask>
-            <div className="col-span-2">
+      {/* Exibe alerta de erro, se houver */}
+      <AlertError appError={error} onClose={() => setError(null)} />
+
+      <form onSubmit={handleSubmit} className="flex flex-col gap-1">
+        {/* Campos editáveis do formulário de cliente */}
+        <FloatingLabel
+          variant="filled"
+          label="Nome"
+          type="text"
+          value={client.name}
+          onChange={handleInputChange('name')}
+          required
+        />
+        <div className="grid grid-cols-3 gap-2">
+          <InputMask
+            mask="(99) 99999-9999"
+            value={client.phone}
+            onChange={handleInputChange('phone')}
+          >
+            {(inputProps: any) => (
               <FloatingLabel
                 variant="filled"
-                className="col-span-2"
-                label="Email (Opcional)"
-                type="email"
-                value={client.email}
-                onChange={handleInputChange('email')}
+                {...inputProps}
+                label="Telefone"
+                value={client.phone}
+                required
               />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
+            )}
+          </InputMask>
+          <div className="col-span-2">
             <FloatingLabel
               variant="filled"
-              label="Curso (Opcional)"
-              type="text"
-              value={client.course}
-              onChange={handleInputChange('course')}
+              className="col-span-2"
+              label="Email (Opcional)"
+              type="email"
+              value={client.email}
+              onChange={handleInputChange('email')}
             />
-            <FloatingLabel
-              variant="filled"
-              label="Instituto (Opcional)"
-              type="text"
-              value={client.institute}
-              onChange={handleInputChange('institute')}
-            />
-          </div>
-          <div className="flex justify-between items-center py-4">
-            {/* Botões para excluir e atualizar o cliente */}
-            <Button color="red" onClick={handleDelete}>
-              Excluir
-            </Button>
-            <Button type="submit" disabled={buttonUpEnable}>
-              Atualizar
-            </Button>
-          </div>
-        </form>
-        <Title disabled>Lista de Pedidos</Title>
-        <div className="grid grid-cols-3 items-start gap-x-4">
-          <div>
-            {/* Campo de busca na lista de pedidos */}
-            <FloatingLabel
-              variant="standard"
-              label="Buscar"
-              type="text"
-              value={searchText}
-              onChange={handleSearch}
-            />
-          </div>
-          <div className="flex items-center gap-x-4 z-50">
-            <p>Filtrar por:</p>
-            {/* Dropdown para filtrar por status de pedido */}
-            <Dropdown color="gray" label={filterStatus ? OrderStatus[filterStatus] : "TODOS"}>
-              <Dropdown.Item onClick={() => setFilterStatus(OrderStatus.ATIVO)}>ATIVO</Dropdown.Item>
-              <Dropdown.Item onClick={() => setFilterStatus(OrderStatus.FINALIZADO)}>FINALIZADO</Dropdown.Item>
-              <Dropdown.Item onClick={() => setFilterStatus(OrderStatus.TODOS)}>TODOS</Dropdown.Item>
-            </Dropdown>
-          </div>
-          <div className="flex justify-end">
-            {/* Botão para adicionar novo pedido */}
-            <Button onClick={() => navigate(`/orders/create/${client.id}`)}>Novo</Button>
           </div>
         </div>
-        {/* Tabela de pedidos */}
-        <GenericTable data={dataOrdersByClient} columns={columns} keyExtractor={(data: Order) => data.id} />
-        {/* Controla a paginação da tabela de pedidos */}
-        <PaginationControls
-          currentPage={currentPage}
-          totalRecords={countOrdersByClient}
-          onPageChange={onPageChange}
-        />
-      </Container>
-    )
-  }
+        <div className="grid grid-cols-2 gap-2">
+          <FloatingLabel
+            variant="filled"
+            label="Curso (Opcional)"
+            type="text"
+            value={client.course}
+            onChange={handleInputChange('course')}
+          />
+          <FloatingLabel
+            variant="filled"
+            label="Instituto (Opcional)"
+            type="text"
+            value={client.institute}
+            onChange={handleInputChange('institute')}
+          />
+        </div>
+        <div className="flex justify-between items-center py-4">
+          {/* Botões para excluir e atualizar o cliente */}
+          <Button color="red" onClick={handleDelete}>
+            Excluir
+          </Button>
+          <Button type="submit" disabled={buttonUpEnable}>
+            Atualizar
+          </Button>
+        </div>
+      </form>
+      <Title disabled>Lista de Pedidos</Title>
+      <div className="grid grid-cols-3 items-start gap-x-4">
+        <div>
+          {/* Campo de busca na lista de pedidos */}
+          <FloatingLabel
+            variant="standard"
+            label="Buscar"
+            type="text"
+            value={searchText}
+            onChange={handleSearch}
+          />
+        </div>
+        <div className="flex items-center gap-x-4 z-50">
+          <p>Filtrar por:</p>
+          {/* Dropdown para filtrar por status de pedido */}
+          <Dropdown color="gray" label={filterStatus ? OrderStatus[filterStatus] : "TODOS"}>
+            <Dropdown.Item onClick={() => setFilterStatus(OrderStatus.ATIVO)}>ATIVO</Dropdown.Item>
+            <Dropdown.Item onClick={() => setFilterStatus(OrderStatus.FINALIZADO)}>FINALIZADO</Dropdown.Item>
+            <Dropdown.Item onClick={() => setFilterStatus(OrderStatus.TODOS)}>TODOS</Dropdown.Item>
+          </Dropdown>
+        </div>
+        <div className="flex justify-end">
+          {/* Botão para adicionar novo pedido */}
+          <Button onClick={() => navigate(`/orders/create/${client.id}`)}>Novo</Button>
+        </div>
+      </div>
+      {/* Tabela de pedidos */}
+      <GenericTable data={data} columns={columns} keyExtractor={(data: Order) => data.id} />
+      {/* Controla a paginação da tabela de pedidos */}
+      <PaginationControls
+        currentPage={currentPage}
+        totalRecords={count}
+        onPageChange={onPageChange}
+      />
+    </Container>
+  )
+}
 
-  export default ClienteDetails
+export default ClienteDetails
