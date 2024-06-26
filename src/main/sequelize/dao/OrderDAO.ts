@@ -1,10 +1,11 @@
-import { Op, Transaction } from 'sequelize'
-import Order from '../models/Order'
+import { Op, Transaction } from 'sequelize';
+import Order from '../models/Order';
 import Service from '@backend/models/Service';
 import Client from '@backend/models/Client';
 import { OrderStatus } from '@backend/enums/OrderStatus';
 import Task from '@backend/models/Task';
 import sequelize from '@backend/db';
+import { IAppError, SQLiteError } from '@backend/interface/IAppError';
 
 class OrderDAO {
   static async findAll(
@@ -32,14 +33,12 @@ class OrderDAO {
       ]
     };
 
-    // Verifica se page está definido e maior que 0 para aplicar limit e offset
     if (page && page > 0) {
       offset = (page - 1) * limit;
       options.limit = limit;
       options.offset = offset;
     }
 
-    // Verifica se searchText está definido para construir a cláusula where
     if (searchText) {
       whereClause[Op.or] = [
         { theme: { [Op.like]: `%${searchText}%` } },
@@ -47,45 +46,65 @@ class OrderDAO {
       ];
     }
 
-    // Verifica se filterStatus está definido e diferente de OrderStatus.TODOS
-    if (filterStatus && filterStatus != OrderStatus.TODOS) {
+    if (filterStatus && filterStatus !== OrderStatus.TODOS) {
       whereClause.status = filterStatus;
     }
 
-    // Executa as consultas de forma assíncrona
-    const [data, count] = await Promise.all([
-      Order.findAll(options),
-      Order.count({
-        where: whereClause,
-        include: [Client]
-      })
-    ]);
-
-    return { data, count };
+    try {
+      const [data, count] = await Promise.all([
+        Order.findAll(options),
+        Order.count({
+          where: whereClause,
+          include: [Client]
+        })
+      ]);
+      return { data, count };
+    } catch (error) {
+      console.error('Erro ao buscar ordens:', error);
+      const appError: IAppError = {
+        message: 'Não foi possível buscar as ordens',
+        code: 'ERRO_BUSCA_ORDENS',
+        details: error as SQLiteError,
+      };
+      throw new Error(JSON.stringify(appError));
+    }
   }
 
   static async findById(id: number): Promise<Order | null> {
-    const data = await Order.findByPk(
-      id,
-      {
-        include: [
-          {
-            model: Client,
-            attributes: ['id', 'name']
-          },
-          {
-            model: Task
-          }
-        ]
+    try {
+      const data = await Order.findByPk(
+        id,
+        {
+          include: [
+            {
+              model: Client,
+              attributes: ['id', 'name']
+            },
+            {
+              model: Task
+            }
+          ]
+        }
+      );
+
+      if (data) {
+        return data.toJSON() as Order;
+      } else {
+        const notFoundError: IAppError = {
+          message: 'Ordem não encontrada',
+          code: 'ORDEM_NAO_ENCONTRADA',
+        };
+        throw new Error(JSON.stringify(notFoundError));
       }
-    );
-
-    if (data) {
-      // Convertendo para JSON para obter um objeto simples
-      return data.toJSON() as Order;
+    } catch (error) {
+      console.error('Erro ao buscar ordem por ID:', error);
+      const appError: IAppError = {
+        message: 'Não foi possível buscar a ordem',
+        code: 'ERRO_BUSCA_ORDEM',
+        details: error as SQLiteError,
+      };
+      throw new Error(JSON.stringify(appError));
     }
-
-    return null;
   }
 
   static async findOrdersByClientId(
@@ -108,33 +127,42 @@ class OrderDAO {
       ];
     }
 
-
     if (filterStatus && filterStatus !== OrderStatus.TODOS) {
       whereClause.status = filterStatus;
     }
 
-    const [data, count] = await Promise.all([
-      Order.findAll({
-        where: whereClause,
-        limit: limit,
-        offset: offset,
-        include: [{
-          model: Service,
-          attributes: ['description']
-        }],
-        raw: true,
-        nest: true,
-      }),
-      Order.count({
-        where: whereClause,
-        include: [{
-          model: Service,
-          attributes: ['description']
-        }],
-      })
-    ]);
+    try {
+      const [data, count] = await Promise.all([
+        Order.findAll({
+          where: whereClause,
+          limit: limit,
+          offset: offset,
+          include: [{
+            model: Service,
+            attributes: ['description']
+          }],
+          raw: true,
+          nest: true,
+        }),
+        Order.count({
+          where: whereClause,
+          include: [{
+            model: Service,
+            attributes: ['description']
+          }],
+        })
+      ]);
 
-    return { data, count };
+      return { data, count };
+    } catch (error) {
+      console.error('Erro ao buscar ordens por ID do cliente:', error);
+      const appError: IAppError = {
+        message: 'Não foi possível buscar as ordens do cliente',
+        code: 'ERRO_BUSCA_ORDENS_CLIENTE',
+        details: error as SQLiteError,
+      };
+      throw new Error(JSON.stringify(appError));
+    }
   }
 
   static async save(data: Order): Promise<Order | null> {
@@ -152,46 +180,98 @@ class OrderDAO {
       return order;
     } catch (error) {
       await transaction.rollback();
-      throw error;
+      console.error('Erro ao salvar ordem:', error);
+      const appError: IAppError = {
+        message: 'Não foi possível salvar a ordem',
+        code: 'ERRO_SALVAR_ORDEM',
+        details: error as SQLiteError,
+      };
+      throw new Error(JSON.stringify(appError));
     }
   }
 
   static async create(data: Order, transaction: Transaction): Promise<Order> {
-    const order = await Order.create(data, { transaction });
+    try {
+      const order = await Order.create(data, { transaction });
 
-    if (data.Tasks && data.Tasks.length > 0) {
-      for (const task of data.Tasks) {
-        await Task.create({ ...task, idOrder: order.id }, { transaction });
+      if (data.Tasks && data.Tasks.length > 0) {
+        for (const task of data.Tasks) {
+          await Task.create({ ...task, idOrder: order.id }, { transaction });
+        }
       }
-    }
 
-    return order;
+      return order;
+    } catch (error) {
+      console.error('Erro ao criar ordem:', error);
+      const appError: IAppError = {
+        message: 'Não foi possível criar a ordem',
+        code: 'ERRO_CRIAR_ORDEM',
+        details: error as SQLiteError,
+      };
+      throw new Error(JSON.stringify(appError));
+    }
   }
 
   static async update(id: number, data: Partial<Order>, transaction: Transaction): Promise<Order> {
-    const [updateCount] = await Order.update(data, { where: { id }, transaction });
+    try {
+      const [updateCount] = await Order.update(data, { where: { id }, transaction });
 
-    if (updateCount === 0) {
-      throw new Error(`Order with id ${id} not found`);
+      if (updateCount === 0) {
+        const notFoundError: IAppError = {
+          message: `Ordem com id ${id} não encontrada`,
+          code: 'ORDEM_NAO_ENCONTRADA',
+        };
+        throw new Error(JSON.stringify(notFoundError));
+      }
+
+      await Task.destroy({ where: { idOrder: id }, transaction });
+      if (data.Tasks && data.Tasks.length > 0) {
+        await Task.bulkCreate(data.Tasks, { transaction });
+      }
+
+      const updatedOrder = await Order.findByPk(id, { include: [Client, Task], transaction });
+
+      if (!updatedOrder) {
+        const notFoundError: IAppError = {
+          message: `Ordem com id ${id} não encontrada após atualização`,
+          code: 'ORDEM_NAO_ENCONTRADA',
+        };
+        throw new Error(JSON.stringify(notFoundError));
+      }
+
+      return updatedOrder.toJSON() as Order;
+    } catch (error) {
+      console.error('Erro ao atualizar ordem:', error);
+      const appError: IAppError = {
+        message: 'Não foi possível atualizar a ordem',
+        code: 'ERRO_ATUALIZAR_ORDEM',
+        details: error as SQLiteError,
+      };
+      throw new Error(JSON.stringify(appError));
     }
-
-    await Task.destroy({ where: { idOrder: id }, transaction });
-    if (data.Tasks && data.Tasks.length > 0) {
-      await Task.bulkCreate(data.Tasks, { transaction });
-    }
-
-    const updatedOrder = await Order.findByPk(id, { include: [Client, Task], transaction });
-
-    if (!updatedOrder) {
-      throw new Error(`Order with id ${id} not found after update`);
-    }
-
-    return updatedOrder.toJSON() as Order;
   }
 
   static async delete(id: number): Promise<number> {
-    return await Order.destroy({ where: { id } })
+    try {
+      const deletedRows = await Order.destroy({ where: { id } });
+      if (deletedRows === 0) {
+        const notFoundError: IAppError = {
+          message: `Ordem com id ${id} não encontrada para exclusão`,
+          code: 'ORDEM_NAO_ENCONTRADA',
+        };
+        throw new Error(JSON.stringify(notFoundError));
+      }
+      return deletedRows;
+    } catch (error) {
+      console.error('Erro ao deletar ordem:', error);
+      const appError: IAppError = {
+        message: 'Não foi possível deletar a ordem',
+        code: 'ERRO_DELECAO_ORDEM',
+        details: error as SQLiteError,
+      };
+      throw new Error(JSON.stringify(appError));
+    }
   }
 }
 
-export default OrderDAO
+export default OrderDAO;
