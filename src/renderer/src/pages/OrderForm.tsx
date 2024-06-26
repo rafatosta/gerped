@@ -54,7 +54,6 @@ function OrderForm() {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        console.log(name, value);
 
         setOrder((prevOrder) => ({
             ...prevOrder,
@@ -64,14 +63,12 @@ function OrderForm() {
     };
 
     const handleRemoveOrder = async () => {
-        
         remove(order.id)
         navigate(-1)
     }
 
 
     const handleSave = async () => {
-        console.log(order)
         save(order)
         navigate(-1)
     }
@@ -104,10 +101,8 @@ function OrderForm() {
 
     const createTask = () => {
         if (newTask.trim()) {
-            console.log(newTask);
             const updateTasks = [...(order.Tasks ?? [])];
             const createNewTask = { description: newTask, status: TaskStatus.PENDENTE, idOrder: order.id } as Task
-            console.log(createNewTask);
             setOrder((prevOrder) => ({ ...prevOrder, Tasks: [...updateTasks, createNewTask] } as Order));
 
             setNewTask('')
