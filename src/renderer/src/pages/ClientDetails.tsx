@@ -1,4 +1,4 @@
-import { Badge, Button, Dropdown, FloatingLabel, Label, Tabs, TextInput } from 'flowbite-react'
+import { Alert, Badge, Button, Dropdown, FloatingLabel, Label, Tabs, TextInput } from 'flowbite-react'
 import { FormEvent, useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 
@@ -13,12 +13,16 @@ import { OrderStatus } from '@backend/enums/OrderStatus'
 import formatDate from '@renderer/utils/formatDate'
 import { useOrder } from '@renderer/hooks/useOrder'
 import PaginationControls from '@renderer/components/PaginationControls'
+import { IAppError } from '@backend/interface/IAppError'
+import AlertError from '@renderer/components/AlertError'
 
 
 function ClienteDetails() {
   const { id } = useParams<{ id: string }>()
 
   const navigate = useNavigate()
+
+  const [error, setError] = useState<IAppError | null>(null)
 
   const [currentPage, setCurrentPage] = useState<number>(1)
   const [searchText, setSearchText] = useState<string>('')
@@ -68,22 +72,23 @@ function ClienteDetails() {
   const handleSubmit = useCallback(
     async (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault()
-      try {
-        await save(client)
+
+      save(client).then(() => {
         setButtonUpEnable(true)
-      } catch (error) {
-        console.error('Error saving Cliente:', error)
-      }
+      }).catch((err: IAppError) => {
+        setError(err)
+      })
     },
     [client, save]
   )
 
   const handleDelete = useCallback(async () => {
     if (client.id) {
-      await remove(client.id)
-      navigate('/clients')
-    } else {
-      console.error('ID is undefined')
+      remove(client.id).then(() => {
+        navigate('/clients')
+      }).catch((err: IAppError) => {
+        setError(err)
+      })
     }
   }, [client.id, remove, navigate])
 
@@ -126,6 +131,9 @@ function ClienteDetails() {
         <Title>Detalhe do cliente</Title>
         <p className="text-gray-400 italic text-lg">#{client.id}</p>
       </div>
+
+      <AlertError appError={error} onClose={() => setError(null)} />
+
       <form onSubmit={handleSubmit} className="flex flex-col gap-1">
         <FloatingLabel
           variant="filled"
