@@ -59,7 +59,7 @@ function AlertError({ appError, onClose }: IAlertError) {
 
     const ExampleAdditionalContent = () => {
         return (
-            <>
+            <div className="flex justify-between items-center">
                 <div className="text-md font-semibold">
                     {appError?.details?.name == "SequelizeForeignKeyConstraintError" ?
                         "Cliente com Pedidos cadastrados"
@@ -77,9 +77,8 @@ function AlertError({ appError, onClose }: IAlertError) {
                         <HiEye className="-ml-0.5 mr-2 h-4 w-4" />
                         Detalhes
                     </button>
-
                 </div>}
-            </>
+            </div>
         );
     }
 
