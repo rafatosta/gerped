@@ -35,6 +35,8 @@ class Order extends Model<OrderAttributes, OrderCreationAttributes> implements O
     public Client!: Client;
     public Service!: Service;
     public Tasks!: Task[]
+    public countTask!: number;
+    public countTaskActive!: number
 
 
     // timestamps!
