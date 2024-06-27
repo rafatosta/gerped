@@ -17,6 +17,8 @@ export interface OrderAttributes {
     Client?: Client;
     Service?: Service;
     Tasks?: Task[]
+    countTask?: number;
+    countTaskActive?: number
 }
 
 interface OrderCreationAttributes extends Optional<OrderAttributes, 'id'> { }
