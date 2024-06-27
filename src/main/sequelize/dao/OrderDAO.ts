@@ -20,7 +20,7 @@ class OrderDAO {
     let whereClause: any = {}; // Clausula where inicial vazia
     let options: any = {
       where: whereClause, // Condições de busca
-      order: [['createdAt', 'DESC']], // Ordenação por data de criação descendente
+      order: [['deliveryDate', 'DESC']], // Ordenação por data de entrega descendente
       raw: true, // Retorna os resultados como objetos JavaScript simples
       nest: true, // Aninha os resultados dentro dos modelos relacionados
       include: [ // Inclui modelos relacionados para trazer atributos específicos
