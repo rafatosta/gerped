@@ -3,7 +3,7 @@ import { parseError } from "@renderer/utils/parseError";
 
 class ClientIPC {
 
-  static async findAll(searchText: string, currentPage: number): Promise<{ data: Client[]; count: number }> {
+  static async findAll(searchText?: string, currentPage?: number): Promise<{ data: Client[]; count: number }> {
     try {
       return await window.electron.ipcRenderer.invoke('client:findAll', searchText, currentPage);
     } catch (err) {

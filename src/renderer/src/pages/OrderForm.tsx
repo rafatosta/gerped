@@ -1,14 +1,18 @@
 import { OrderStatus } from "@backend/enums/OrderStatus";
 import { TaskStatus } from "@backend/enums/TaskStatus";
+import { IAppError } from "@backend/interface/IAppError";
+import Client from "@backend/models/Client";
 import Order from "@backend/models/Order";
+import Service from "@backend/models/Service";
 import Task from "@backend/models/Task";
+import AlertError from "@renderer/components/AlertError";
 import Container from "@renderer/components/Container";
 import FloatingSelect from "@renderer/components/FloatingSelect";
 import GenericTable from "@renderer/components/GenericTable";
 import Title from "@renderer/components/Title";
-import { useClient } from "@renderer/hooks/useClient";
-import { useOrder } from "@renderer/hooks/useOrder";
-import { useService } from "@renderer/hooks/useService";
+import ClientIPC from "@renderer/ipc/ClientIPC";
+import OrderIPC from "@renderer/ipc/OrderIPC";
+import ServiceIPC from "@renderer/ipc/ServiceIPC";
 import formatDate from "@renderer/utils/formatDate";
 import { Button, Checkbox, FloatingLabel, Label } from "flowbite-react";
 import { useEffect, useState } from "react";
@@ -26,21 +30,44 @@ function OrderForm() {
         theme: "",
         orderDate: new Date(),
         deliveryDate: new Date(),
+
         price: 0,
         status: OrderStatus.ATIVO,
     } as Order)
 
     const [newTask, setNewTask] = useState<string>('')
+    const [error, setError] = useState<IAppError | null>(null)
 
-    const { data: dataService } = useService()
-    const { save, findById, remove } = useOrder()
-    const { data: dataClient } = useClient()
+    const [dataClient, setDataClient] = useState<Client[]>([])
+    const [dataService, setDataService] = useState<Service[]>([])
+
+
+    const fetchClients = async () => {
+        ClientIPC.findAll().then((res) => {
+            setDataClient(res.data)
+            setError(null);
+        }).catch((err: IAppError) => {
+            setError(err)
+        })
+    };
+
+    const fetchServices = async () => {
+        ServiceIPC.findAll().then((res) => {
+            setDataService(res.data)
+          
+            setError(null);
+        }).catch((err: IAppError) => {
+            setError(err)
+        })
+    };
 
     useEffect(() => {
         if (orderId) { // Buscar Order pelo ID
-            findById(orderId)
+            OrderIPC.findById(orderId)
                 .then(data => {
                     setOrder(data)
+                }).catch((err: IAppError) => {
+                    setError(err)
                 })
 
         } else if (clientId) { // Definir o ID do cliente em nova Order
@@ -49,6 +76,9 @@ function OrderForm() {
                 idClient: parseInt(clientId)
             } as Order))
         }
+
+        fetchClients()
+        fetchServices()
 
     }, [orderId, clientId])
 
@@ -63,14 +93,21 @@ function OrderForm() {
     };
 
     const handleRemoveOrder = async () => {
-        remove(order.id)
+        OrderIPC.delete(order.id)
+            .then(() => navigate(-1))
+            .catch((err: IAppError) => {
+                setError(err)
+            })
         navigate(-1)
     }
 
 
     const handleSave = async () => {
-        save(order)
-        navigate(-1)
+        OrderIPC.save(order)
+            .then(() => navigate(-1))
+            .catch((err: IAppError) => {
+                setError(err)
+            })
     }
 
     const handleTaskStatusChange = (index: number) => {
@@ -158,6 +195,8 @@ function OrderForm() {
                 <Title>Pedido</Title>
                 {orderId && <p className="text-gray-400 italic text-lg">#{orderId}</p>}
             </div>
+            {/* Exibe alerta de erro, se houver */}
+            <AlertError appError={error} onClose={() => setError(null)} />
 
             <form
                 className="flex flex-col gap-1"

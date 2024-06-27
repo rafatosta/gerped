@@ -1,14 +1,16 @@
 
 import { OrderStatus } from "@backend/enums/OrderStatus";
+import { IAppError } from "@backend/interface/IAppError";
 import Order from "@backend/models/Order";
+import AlertError from "@renderer/components/AlertError";
 import Container from "@renderer/components/Container";
 import GenericTable from "@renderer/components/GenericTable";
 import PaginationControls from "@renderer/components/PaginationControls";
 import Title from "@renderer/components/Title";
-import { useOrder } from "@renderer/hooks/useOrder";
+import OrderIPC from "@renderer/ipc/OrderIPC";
 import formatDate from "@renderer/utils/formatDate";
 import { Badge, Button, Dropdown, FloatingLabel } from "flowbite-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 function Orders() {
@@ -18,7 +20,25 @@ function Orders() {
 
     const navigate = useNavigate()
 
-    const { data, count } = useOrder(searchText, currentPage, filterStatus)
+    const [data, setData] = useState<Order[]>([])
+    const [count, setCount] = useState<number>(0);
+
+    const [error, setError] = useState<IAppError | null>(null)
+
+    const fetchData = async () => {
+        OrderIPC.findAll(searchText, currentPage, filterStatus).then((res) => {
+            setData(res.data)
+            setCount(res.count)
+            setError(null);
+        }).catch((err: IAppError) => {
+            setError(err)
+        })
+    };
+
+    useEffect(() => {
+        fetchData()
+    }, [searchText, currentPage, filterStatus]);
+
 
     const onPageChange = (page: number) => setCurrentPage(page)
     const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) =>
@@ -65,6 +85,8 @@ function Orders() {
     return (
         <Container>
             <Title disabled>Pedidos</Title>
+            {/* Exibe alerta de erro, se houver */}
+            <AlertError appError={error} onClose={() => setError(null)} />
             <div className="grid grid-cols-4 items-start gap-x-4">
                 <div className="col-span-2">
                     <FloatingLabel
@@ -75,7 +97,7 @@ function Orders() {
                         onChange={handleSearch}
                     />
                 </div>
-                <div className="flex items-center gap-x-4">
+                <div className="flex items-center gap-x-4 z-50">
                     <p>Filtrar por:</p>
                     <Dropdown color="gray" label={filterStatus ? OrderStatus[filterStatus] : "TODOS"}>
                         <Dropdown.Item onClick={() => setFilterStatus(OrderStatus.ATIVO)}>ATIVO</Dropdown.Item>
