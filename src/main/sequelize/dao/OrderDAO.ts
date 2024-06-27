@@ -157,6 +157,7 @@ class OrderDAO {
           }],
           raw: true, // Retorna os resultados como objetos JavaScript simples
           nest: true, // Aninha os resultados dentro dos modelos relacionados
+          order: [['deliveryDate', 'DESC']], // Ordenação por data de entrega descendente
         }),
         Order.count({
           where: whereClause,

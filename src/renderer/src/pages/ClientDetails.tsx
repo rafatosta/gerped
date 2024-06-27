@@ -58,9 +58,10 @@ function ClienteDetails() {
 
 
   // Função assíncrona para buscar os pedidos com base nos filtros atuais
-  const fetchOrders = async () => {
+  const fetchOrders = async (id: string) => {
+
     try {
-      const res = await OrderIPC.findAll(searchText, currentPage, filterStatus);
+      const res = await OrderIPC.findOrdersByClientId(id, searchText, currentPage, filterStatus);
       setData(res.data);
       setCount(res.count);
       setError(null);
@@ -82,7 +83,7 @@ function ClienteDetails() {
   // Efeito para atualizar a lista de pedidos baseado em mudanças de página, texto de busca ou status de filtro
   useEffect(() => {
     if (id) {
-      fetchOrders()
+      fetchOrders(id)
     }
   }, [currentPage, searchText, filterStatus])
 
