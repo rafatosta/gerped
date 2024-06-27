@@ -5,80 +5,87 @@ import Container from "@renderer/components/Container";
 import GenericTable from "@renderer/components/GenericTable";
 import PaginationControls from "@renderer/components/PaginationControls";
 import ServiceFormModal from "@renderer/components/ServiceFromModal";
-
 import Title from "@renderer/components/Title";
 import ServiceIPC from "@renderer/ipc/ServiceIPC";
-import { Button, FloatingLabel } from "flowbite-react";
+import { FloatingLabel, Button } from "flowbite-react";
 import { useEffect, useState } from "react";
+
 
 function Services() {
     const [searchText, setSearchText] = useState<string>('');
     const [currentPage, setCurrentPage] = useState<number>(1);
 
-    const [data, setData] = useState<Service[]>([])
+    const [data, setData] = useState<Service[]>([]);
     const [count, setCount] = useState<number>(0);
 
-    const [error, setError] = useState<IAppError | null>(null)
-
-    //const { data, count, save, remove } = useService(searchText, currentPage);
-
+    const [error, setError] = useState<IAppError | null>(null);
 
     const [selectedService, setSelectedService] = useState<Service | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-
-    // Carregar a lista de clientes do banco de dados
+    // Função para carregar os serviços do banco de dados
     const fetchData = async () => {
-        ServiceIPC.findAll(searchText, currentPage).then((res) => {
-            setData(res.data)
-            setCount(res.count)
+        try {
+            const res = await ServiceIPC.findAll(searchText, currentPage);
+            setData(res.data);
+            setCount(res.count);
             setError(null);
-        }).catch((err: IAppError) => {
-            setError(err)
-        })
+        } catch (err) {
+            setError(err as IAppError);
+        }
     };
 
     useEffect(() => {
-        fetchData()
+        fetchData();
     }, [searchText, currentPage]);
 
-
-    const onPageChange = (page: number) => setCurrentPage(page);
-
-    const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchText(event.target.value);
-        setCurrentPage(1); // Reset to first page on search
+    // Função para mudar a página atual
+    const onPageChange = (page: number) => {
+        setCurrentPage(page);
     };
 
+    // Função para atualizar o texto de busca e resetar para a primeira página
+    const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchText(event.target.value);
+        setCurrentPage(1); // Reset para a primeira página ao buscar
+    };
+
+    // Função para editar um serviço
     const handleEdit = async (data: Service) => {
         setSelectedService(data);
         setIsModalOpen(true);
     };
 
+    // Função para deletar um serviço
     const handleDelete = async (data: Service) => {
-        ServiceIPC.delete(data.id).then(() => {
-            fetchData()
-          }).catch((err: IAppError) => {
-            setError(err) // Em caso de erro, define o estado de erro
-          })
+        try {
+            await ServiceIPC.delete(data.id);
+            fetchData();
+        } catch (err) {
+            setError(err as IAppError);
+        }
     };
 
+    // Função para salvar um serviço
     const handleSave = async (service: Service) => {
-        ServiceIPC.save(service).then(() => {
+        try {
+            await ServiceIPC.save(service);
             setIsModalOpen(false);
-            setSearchText("")
-            setCurrentPage(1)
-            fetchData()
-        }).catch((err: IAppError) => {
-            setError(err) // Em caso de erro, define o estado de erro
-        })
+            setSearchText("");
+            setCurrentPage(1);
+            fetchData();
+        } catch (err) {
+            setError(err as IAppError);
+        }
     };
 
+    // Função para fechar o modal de formulário
     const onCloseModal = () => {
-        setIsModalOpen(false)
-        setSelectedService(null)
-    }
+        setIsModalOpen(false);
+        setSelectedService(null);
+    };
 
+    // Definição das colunas da tabela de serviços
     const columns = [
         {
             header: 'Descrição',
@@ -111,11 +118,13 @@ function Services() {
 
     return (
         <Container>
+            {/* Título da página */}
             <Title disabled>Serviços</Title>
 
             {/* Exibe alerta de erro, se houver */}
             <AlertError appError={error} onClose={() => setError(null)} />
 
+            {/* Barra de busca e botão para abrir modal de formulário de serviço */}
             <div className="grid grid-cols-3 items-start gap-x-4">
                 <div className="col-span-2">
                     <FloatingLabel
@@ -138,7 +147,15 @@ function Services() {
                     />
                 </div>
             </div>
-            <GenericTable data={data} columns={columns} keyExtractor={(data: Service) => data.id} />
+
+            {/* Tabela de serviços */}
+            <GenericTable
+                data={data}
+                columns={columns}
+                keyExtractor={(data: Service) => data.id}
+            />
+
+            {/* Controles de paginação */}
             <PaginationControls
                 currentPage={currentPage}
                 totalRecords={count}

@@ -16,17 +16,29 @@ import ClientIPC from '@renderer/ipc/ClientIPC'
 import OrderIPC from '@renderer/ipc/OrderIPC'
 
 function ClienteDetails() {
-  const { id } = useParams<{ id: string }>() // Obtém o parâmetro de rota 'id'
-  const navigate = useNavigate() // Hook de navegação do React Router
+  // Obtém o parâmetro de rota 'id'
+  const { id } = useParams<{ id: string }>()
 
-  const [error, setError] = useState<IAppError | null>(null) // Estado para armazenar erros
+  // Hook de navegação do React Router
+  const navigate = useNavigate()
 
-  const [currentPage, setCurrentPage] = useState<number>(1) // Estado para controlar a página atual dos pedidos
-  const [searchText, setSearchText] = useState<string>('') // Estado para o texto de busca na lista de pedidos
-  const [filterStatus, setFilterStatus] = useState<OrderStatus>(OrderStatus.ATIVO); // Estado para o status de filtro dos pedidos
+  // Estado para armazenar erros
+  const [error, setError] = useState<IAppError | null>(null)
 
-  const [buttonUpEnable, setButtonUpEnable] = useState(true) // Estado para controlar o estado do botão 'Atualizar'
-  const [client, setClient] = useState<Client>({ // Estado para armazenar informações do cliente
+  // Estado para controlar a página atual dos pedidos
+  const [currentPage, setCurrentPage] = useState<number>(1)
+
+  // Estado para o texto de busca na lista de pedidos
+  const [searchText, setSearchText] = useState<string>('')
+
+  // Estado para o status de filtro dos pedidos
+  const [filterStatus, setFilterStatus] = useState<OrderStatus>(OrderStatus.ATIVO)
+
+  // Estado para controlar o estado do botão 'Atualizar'
+  const [buttonUpEnable, setButtonUpEnable] = useState(true)
+
+  // Estado para armazenar informações do cliente
+  const [client, setClient] = useState<Client>({
     name: '',
     phone: '',
     email: '',
@@ -34,15 +46,28 @@ function ClienteDetails() {
     institute: ''
   } as Client)
 
+  // Estado para armazenar a lista de pedidos e total de registros
   const [data, setData] = useState<Order[]>([])
-  const [count, setCount] = useState<number>(0);
-  
+  const [count, setCount] = useState<number>(0)
+
   // Função para mudar a página atual dos pedidos
   const onPageChange = (page: number) => setCurrentPage(page)
 
   // Função para atualizar o texto de busca na lista de pedidos
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) =>
-    setSearchText(event.target.value)
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => setSearchText(event.target.value)
+
+
+  // Função assíncrona para buscar os pedidos com base nos filtros atuais
+  const fetchOrders = async () => {
+    try {
+      const res = await OrderIPC.findAll(searchText, currentPage, filterStatus);
+      setData(res.data);
+      setCount(res.count);
+      setError(null);
+    } catch (err: unknown) {
+      setError(err as IAppError);
+    }
+  };
 
   // Efeito para carregar dados do cliente baseado no 'id' da rota
   useEffect(() => {
@@ -57,26 +82,14 @@ function ClienteDetails() {
   // Efeito para atualizar a lista de pedidos baseado em mudanças de página, texto de busca ou status de filtro
   useEffect(() => {
     if (id) {
-      OrderIPC.findOrdersByClientId(id, searchText, currentPage, filterStatus)
-        .then((res) => {
-          setData(res.data)
-          setCount(res.count)
-          setError(null);
-        })
-        .catch((err: IAppError) => {
-          setError(err)
-        })
+      fetchOrders()
     }
   }, [currentPage, searchText, filterStatus])
 
   // Função para atualizar campos do formulário de cliente
   const handleInputChange = (field: keyof Client) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (field === 'phone') {
-      const value = e.target.value.replace(/\D/g, '') // Remove caracteres não numéricos do campo de telefone
-      setClient({ ...client, [field]: value } as Client)
-    } else {
-      setClient({ ...client, [field]: e.target.value } as Client)
-    }
+    const value = (field === 'phone') ? e.target.value.replace(/\D/g, '') : e.target.value
+    setClient({ ...client, [field]: value } as Client)
     setButtonUpEnable(false) // Habilita o botão 'Atualizar'
   }
 
@@ -84,21 +97,23 @@ function ClienteDetails() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
-    ClientIPC.save(client).then(() => {
+    try {
+      await ClientIPC.save(client)
       setButtonUpEnable(true) // Após salvar, habilita o botão 'Atualizar'
-    }).catch((err: IAppError) => {
-      setError(err) // Em caso de erro, define o estado de erro
-    })
+    } catch (err) {
+      setError(err as IAppError) // Em caso de erro, define o estado de erro
+    }
   }
 
   // Função assíncrona para lidar com a exclusão do cliente
   const handleDelete = async () => {
     if (client.id) {
-      ClientIPC.delete(client.id).then(() => {
+      try {
+        await ClientIPC.delete(client.id)
         navigate('/clients') // Após excluir, navega para a lista de clientes
-      }).catch((err: IAppError) => {
-        setError(err) // Em caso de erro, define o estado de erro
-      })
+      } catch (err) {
+        setError(err as IAppError) // Em caso de erro, define o estado de erro
+      }
     }
   }
 
@@ -121,7 +136,7 @@ function ClienteDetails() {
     {
       header: 'Situação',
       accessor: (data: Order) => (
-        <Badge color={data.status == OrderStatus.ATIVO ? "warning" : "success"} className="flex justify-center items-center">
+        <Badge color={data.status === OrderStatus.ATIVO ? 'warning' : 'success'} className="flex justify-center items-center">
           {OrderStatus[data.status]} {/* Exibe o status do pedido com base no enum OrderStatus */}
         </Badge>
       ),
@@ -138,6 +153,7 @@ function ClienteDetails() {
 
   return (
     <Container>
+      {/* Cabeçalho com título "Detalhe do cliente" e exibição do ID do cliente, se disponível */}
       <div className="flex justify-between items-center gap-4">
         <Title>Detalhe do cliente</Title>
         <p className="text-gray-400 italic text-lg">#{client.id}</p>
@@ -146,8 +162,9 @@ function ClienteDetails() {
       {/* Exibe alerta de erro, se houver */}
       <AlertError appError={error} onClose={() => setError(null)} />
 
+      {/* Formulário para edição dos dados do cliente */}
       <form onSubmit={handleSubmit} className="flex flex-col gap-1">
-        {/* Campos editáveis do formulário de cliente */}
+        {/* Campo editável para o nome do cliente */}
         <FloatingLabel
           variant="filled"
           label="Nome"
@@ -156,7 +173,10 @@ function ClienteDetails() {
           onChange={handleInputChange('name')}
           required
         />
+
+        {/* Grid com três colunas para entrada do telefone e email */}
         <div className="grid grid-cols-3 gap-2">
+          {/* Campo de entrada para o telefone com máscara */}
           <InputMask
             mask="(99) 99999-9999"
             value={client.phone}
@@ -172,10 +192,11 @@ function ClienteDetails() {
               />
             )}
           </InputMask>
+
+          {/* Campo de entrada para o email do cliente */}
           <div className="col-span-2">
             <FloatingLabel
               variant="filled"
-              className="col-span-2"
               label="Email (Opcional)"
               type="email"
               value={client.email}
@@ -183,7 +204,10 @@ function ClienteDetails() {
             />
           </div>
         </div>
+
+        {/* Grid com duas colunas para entrada do curso e instituto */}
         <div className="grid grid-cols-2 gap-2">
+          {/* Campo de entrada para o curso do cliente */}
           <FloatingLabel
             variant="filled"
             label="Curso (Opcional)"
@@ -191,6 +215,8 @@ function ClienteDetails() {
             value={client.course}
             onChange={handleInputChange('course')}
           />
+
+          {/* Campo de entrada para o instituto do cliente */}
           <FloatingLabel
             variant="filled"
             label="Instituto (Opcional)"
@@ -199,17 +225,25 @@ function ClienteDetails() {
             onChange={handleInputChange('institute')}
           />
         </div>
+
+        {/* Botões de ação no rodapé do formulário */}
         <div className="flex justify-between items-center py-4">
-          {/* Botões para excluir e atualizar o cliente */}
+          {/* Botão para excluir o cliente */}
           <Button color="red" onClick={handleDelete}>
             Excluir
           </Button>
+
+          {/* Botão para atualizar os dados do cliente */}
           <Button type="submit" disabled={buttonUpEnable}>
             Atualizar
           </Button>
         </div>
       </form>
+
+      {/* Título "Lista de Pedidos" */}
       <Title disabled>Lista de Pedidos</Title>
+
+      {/* Grid com três colunas para busca, filtro por status e adição de novo pedido */}
       <div className="grid grid-cols-3 items-start gap-x-4">
         <div>
           {/* Campo de busca na lista de pedidos */}
@@ -221,29 +255,35 @@ function ClienteDetails() {
             onChange={handleSearch}
           />
         </div>
+
         <div className="flex items-center gap-x-4 z-50">
           <p>Filtrar por:</p>
+
           {/* Dropdown para filtrar por status de pedido */}
-          <Dropdown color="gray" label={filterStatus ? OrderStatus[filterStatus] : "TODOS"}>
+          <Dropdown color="gray" label={filterStatus ? OrderStatus[filterStatus] : 'TODOS'}>
             <Dropdown.Item onClick={() => setFilterStatus(OrderStatus.ATIVO)}>ATIVO</Dropdown.Item>
             <Dropdown.Item onClick={() => setFilterStatus(OrderStatus.FINALIZADO)}>FINALIZADO</Dropdown.Item>
             <Dropdown.Item onClick={() => setFilterStatus(OrderStatus.TODOS)}>TODOS</Dropdown.Item>
           </Dropdown>
         </div>
+
         <div className="flex justify-end">
-          {/* Botão para adicionar novo pedido */}
+          {/* Botão para adicionar novo pedido para o cliente atual */}
           <Button onClick={() => navigate(`/orders/create/${client.id}`)}>Novo</Button>
         </div>
       </div>
-      {/* Tabela de pedidos */}
+
+      {/* Tabela de pedidos associados ao cliente */}
       <GenericTable data={data} columns={columns} keyExtractor={(data: Order) => data.id} />
-      {/* Controla a paginação da tabela de pedidos */}
+
+      {/* Controles de paginação para navegar entre páginas de pedidos */}
       <PaginationControls
         currentPage={currentPage}
         totalRecords={count}
         onPageChange={onPageChange}
       />
     </Container>
+
   )
 }
 

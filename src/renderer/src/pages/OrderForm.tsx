@@ -19,133 +19,143 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 function OrderForm() {
+    // Obtém os parâmetros da URL
+    const { orderId, clientId } = useParams<{ orderId?: string; clientId?: string }>();
 
-    const { orderId, clientId } = useParams<{ orderId?: string; clientId?: string }>()
+    // Hook do React Router para navegação entre páginas
+    const navigate = useNavigate();
 
-    const navigate = useNavigate()
-
+    // Estado para armazenar os dados do pedido
     const [order, setOrder] = useState<Order>({
         idClient: 0,
         idService: 0,
         theme: "",
         orderDate: new Date(),
         deliveryDate: new Date(),
-
         price: 0,
         status: OrderStatus.ATIVO,
-    } as Order)
+    } as Order);
 
-    const [newTask, setNewTask] = useState<string>('')
-    const [error, setError] = useState<IAppError | null>(null)
+    // Estado para armazenar a nova tarefa a ser adicionada
+    const [newTask, setNewTask] = useState<string>('');
+    // Estado para armazenar erros
+    const [error, setError] = useState<IAppError | null>(null);
+    // Estado para armazenar dados de clientes e serviços
+    const [dataClient, setDataClient] = useState<Client[]>([]);
+    const [dataService, setDataService] = useState<Service[]>([]);
 
-    const [dataClient, setDataClient] = useState<Client[]>([])
-    const [dataService, setDataService] = useState<Service[]>([])
-
-
+    // Função para buscar clientes
     const fetchClients = async () => {
-        ClientIPC.findAll().then((res) => {
-            setDataClient(res.data)
+        try {
+            const res = await ClientIPC.findAll();
+            setDataClient(res.data);
             setError(null);
-        }).catch((err: IAppError) => {
-            setError(err)
-        })
+        } catch (err: unknown) {
+            setError(err as IAppError);
+        }
     };
 
+    // Função para buscar serviços
     const fetchServices = async () => {
-        ServiceIPC.findAll().then((res) => {
-            setDataService(res.data)
-          
+        try {
+            const res = await ServiceIPC.findAll();
+            setDataService(res.data);
             setError(null);
-        }).catch((err: IAppError) => {
-            setError(err)
-        })
+        } catch (err: unknown) {
+            setError(err as IAppError);
+        }
     };
 
-    useEffect(() => {
-        if (orderId) { // Buscar Order pelo ID
-            OrderIPC.findById(orderId)
-                .then(data => {
-                    setOrder(data)
-                }).catch((err: IAppError) => {
-                    setError(err)
-                })
+    // Função assíncrona para buscar o pedido com base no parâmetro da página
+    const fetchOrder = async (orderId: string) => {
+        try {
+            const data = await OrderIPC.findById(orderId)
+            setOrder(data)
+        } catch (err) {
+            setError(err as IAppError)
+        }
+    };
 
-        } else if (clientId) { // Definir o ID do cliente em nova Order
+
+    // UseEffect para buscar dados do pedido e preencher os dados de clientes e serviços
+    useEffect(() => {
+        if (orderId) {
+            fetchOrder(orderId)
+        } else if (clientId) {
             setOrder((prevOrder) => ({
                 ...prevOrder,
                 idClient: parseInt(clientId)
-            } as Order))
+            } as Order));
         }
 
-        fetchClients()
-        fetchServices()
+        fetchClients();
+        fetchServices();
+    }, [orderId, clientId]);
 
-    }, [orderId, clientId])
-
+    // Função para lidar com mudanças nos inputs do formulário
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-
         setOrder((prevOrder) => ({
             ...prevOrder,
             [name]: name === 'price' ? parseFloat(value) : (name === 'orderDate' || name === 'deliveryDate') ? new Date(value) : value,
         } as Order));
-
     };
 
+    // Função para remover pedido
     const handleRemoveOrder = async () => {
-        OrderIPC.delete(order.id)
-            .then(() => navigate(-1))
-            .catch((err: IAppError) => {
-                setError(err)
-            })
-        navigate(-1)
-    }
+        try {
+            await OrderIPC.delete(order.id);
+            navigate(-1);
+        } catch (err: unknown) {
+            setError(err as IAppError);
+        }
+    };
 
-
+    // Função para salvar pedido
     const handleSave = async () => {
-        OrderIPC.save(order)
-            .then(() => navigate(-1))
-            .catch((err: IAppError) => {
-                setError(err)
-            })
-    }
+        try {
+            await OrderIPC.save(order);
+            navigate(-1);
+        } catch (err: unknown) {
+            setError(err as IAppError);
+        }
+    };
 
+    // Função para alterar o status da tarefa
     const handleTaskStatusChange = (index: number) => {
         const updateTasks = [...(order.Tasks ?? [])];
-        const updatedStatus =
-            updateTasks[index].status === TaskStatus.FINALIZADO
-                ? TaskStatus.PENDENTE
-                : TaskStatus.FINALIZADO;
-        const updateConclusionDate = updateTasks[index].status === TaskStatus.FINALIZADO
-            ? ""
-            : new Date();
+        const updatedStatus = updateTasks[index].status === TaskStatus.FINALIZADO ? TaskStatus.PENDENTE : TaskStatus.FINALIZADO;
+        const updateConclusionDate = updatedStatus === TaskStatus.FINALIZADO ? new Date() : "";
 
         updateTasks[index] = { ...updateTasks[index], status: updatedStatus, conclusionDate: updateConclusionDate } as Task;
         setOrder((prevOrder) => ({ ...prevOrder, Tasks: updateTasks } as Order));
     };
 
+    // Função para alterar a descrição da tarefa
     const handleTaskDescriptionChange = (index: number, description: string) => {
         const updateTasks = [...(order.Tasks ?? [])];
-        updateTasks[index] = { ...updateTasks[index], description } as Task
+        updateTasks[index] = { ...updateTasks[index], description } as Task;
         setOrder((prevOrder) => ({ ...prevOrder, Tasks: updateTasks } as Order));
-    }
+    };
 
+    // Função para deletar tarefa
     const handleTaskDelete = (index: number) => {
         const updateTasks = [...(order.Tasks ?? [])];
-        updateTasks.splice(index, 1)
+        updateTasks.splice(index, 1);
         setOrder((prevOrder) => ({ ...prevOrder, Tasks: updateTasks } as Order));
-    }
+    };
 
+    // Função para criar nova tarefa
     const createTask = () => {
         if (newTask.trim()) {
             const updateTasks = [...(order.Tasks ?? [])];
-            const createNewTask = { description: newTask, status: TaskStatus.PENDENTE, idOrder: order.id } as Task
+            const createNewTask = { description: newTask, status: TaskStatus.PENDENTE, idOrder: order.id } as Task;
             setOrder((prevOrder) => ({ ...prevOrder, Tasks: [...updateTasks, createNewTask] } as Order));
-
-            setNewTask('')
+            setNewTask('');
         }
-    }
+    };
 
+    // Definição das colunas da tabela de tarefas
     const columns = [
         {
             header: 'Situação',
@@ -163,7 +173,7 @@ function OrderForm() {
             )
         },
         {
-            header: 'Terefa',
+            header: 'Tarefa',
             accessor: (data: Task, index: number) => (
                 <FloatingLabel
                     variant="standard"
@@ -191,21 +201,26 @@ function OrderForm() {
 
     return (
         <Container>
+            {/* Cabeçalho com título do Pedido e número de identificação, se disponível */}
             <div className="flex justify-between items-center gap-4">
                 <Title>Pedido</Title>
                 {orderId && <p className="text-gray-400 italic text-lg">#{orderId}</p>}
             </div>
+
             {/* Exibe alerta de erro, se houver */}
             <AlertError appError={error} onClose={() => setError(null)} />
 
+            {/* Formulário para edição de dados do Pedido */}
             <form
                 className="flex flex-col gap-1"
                 onSubmit={(e) => {
-                    e.preventDefault()
-                    handleSave()
+                    e.preventDefault();
+                    handleSave();
                 }}
             >
+                {/* Grid com duas colunas para seleção de Cliente e Serviço */}
                 <div className="grid grid-cols-2 gap-2">
+                    {/* Dropdown para seleção de Cliente */}
                     <FloatingSelect
                         label={order.idClient ? "Cliente" : "Selecione o cliente"}
                         name="idClient"
@@ -214,16 +229,14 @@ function OrderForm() {
                         onChange={handleChange}
                         required
                     >
-                        {
-                            dataClient.map((client) => (
-                                <option key={client.id} value={client.id}>
-                                    {client.name}
-                                </option>
-                            ))
-                        }
-
+                        {dataClient.map((client) => (
+                            <option key={client.id} value={client.id}>
+                                {client.name}
+                            </option>
+                        ))}
                     </FloatingSelect>
 
+                    {/* Dropdown para seleção de Serviço */}
                     <FloatingSelect
                         label={order.idService ? "Serviço" : "Selecione o serviço"}
                         name="idService"
@@ -238,6 +251,8 @@ function OrderForm() {
                         ))}
                     </FloatingSelect>
                 </div>
+
+                {/* Campo de entrada para o tema do Pedido */}
                 <FloatingLabel
                     variant="filled"
                     label="Tema"
@@ -247,7 +262,10 @@ function OrderForm() {
                     onChange={handleChange}
                     required
                 />
+
+                {/* Grid com duas colunas para data de pedido e data de entrega */}
                 <div className="grid grid-cols-2 gap-2">
+                    {/* Campo de entrada para data de pedido */}
                     <FloatingLabel
                         variant="filled"
                         label="Data do pedido"
@@ -257,6 +275,8 @@ function OrderForm() {
                         onChange={handleChange}
                         required
                     />
+
+                    {/* Campo de entrada para data de entrega */}
                     <FloatingLabel
                         variant="filled"
                         label="Data de entrega"
@@ -267,7 +287,10 @@ function OrderForm() {
                         required
                     />
                 </div>
+
+                {/* Grid com duas colunas para valor e status do Pedido */}
                 <div className="grid grid-cols-2 gap-2">
+                    {/* Campo de entrada para valor do Pedido */}
                     <FloatingLabel
                         variant="filled"
                         value={order.price}
@@ -277,6 +300,8 @@ function OrderForm() {
                         onChange={handleChange}
                         required
                     />
+
+                    {/* Dropdown para seleção de status do Pedido */}
                     <FloatingSelect
                         label="Status do pedido"
                         name="status"
@@ -288,21 +313,30 @@ function OrderForm() {
                         <option value={OrderStatus.FINALIZADO}>Finalizado</option>
                     </FloatingSelect>
                 </div>
+
+                {/* Botões de ação no rodapé do formulário */}
                 <div className="pl-64 ml-4 absolute inset-x-0 bottom-0 flex justify-between items-center gap-2 z-50 p-2">
+                    {/* Botão para excluir o Pedido */}
                     <Button color="yellow" onClick={handleRemoveOrder}>
                         Excluir pedido
                     </Button>
+
+                    {/* Grupo de botões para cancelar e salvar o Pedido */}
                     <div className="flex items-center gap-2">
                         <Button color="red" onClick={() => navigate(-1)}>
                             Cancelar
                         </Button>
                         <Button type="submit">Salvar</Button>
                     </div>
-
                 </div>
             </form>
+
+            {/* Título da lista de tarefas */}
             <Title disabled>Lista de Tarefas</Title>
+
+            {/* Grid com duas colunas para adicionar nova tarefa e botão de adicionar */}
             <div className="grid grid-cols-2 items-center gap-2">
+                {/* Campo de entrada para nova tarefa */}
                 <FloatingLabel
                     variant="standard"
                     label="Nova tarefa"
@@ -311,16 +345,22 @@ function OrderForm() {
                     value={newTask}
                     onChange={(e) => setNewTask(e.target.value)}
                 />
-                <Button className="w-fit"
-                    onClick={createTask}
-                >Adicionar</Button>
+
+                {/* Botão para adicionar nova tarefa */}
+                <Button className="w-fit" onClick={createTask}>
+                    Adicionar
+                </Button>
             </div>
 
+            {/* Tabela de tarefas associadas ao Pedido */}
             {order.Tasks && (
                 <GenericTable data={order.Tasks} columns={columns} keyExtractor={(data: Task) => data.id} />
             )}
+
+            {/* Espaço em branco no final para melhorar a visualização */}
             <div className="h-12" />
         </Container>
+
     );
 }
 

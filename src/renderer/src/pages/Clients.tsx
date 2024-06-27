@@ -1,6 +1,8 @@
-import { IAppError } from '@backend/interface/IAppError'
-import Client from '@backend/models/Client'
+import { FloatingLabel } from 'flowbite-react'
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import AlertError from '@renderer/components/AlertError'
+import Client from '@backend/models/Client'
 import ClientFormModal from '@renderer/components/ClientFormModal'
 import Container from '@renderer/components/Container'
 import GenericTable from '@renderer/components/GenericTable'
@@ -8,38 +10,41 @@ import PaginationControls from '@renderer/components/PaginationControls'
 import Title from '@renderer/components/Title'
 import ClientIPC from '@renderer/ipc/ClientIPC'
 import { formatPhoneNumber } from '@renderer/utils/formatPhoneNumber'
-import { FloatingLabel } from 'flowbite-react'
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { IAppError } from '@backend/interface/IAppError'
 
 function Clients() {
-  const [currentPage, setCurrentPage] = useState<number>(1) // Estado para controlar a página atual da lista de Clientes
-  const [searchText, setSearchText] = useState<string>('') // Estado para armazenar o texto de busca na lista de Clientes
+  // Estado para controlar a página atual da lista de Clientes
+  const [currentPage, setCurrentPage] = useState<number>(1)
 
+  // Estado para armazenar o texto de busca na lista de Clientes
+  const [searchText, setSearchText] = useState<string>('')
+
+  // Estado para armazenar a lista de Clientes e total de registros
   const [data, setData] = useState<Client[]>([])
-  const [count, setCount] = useState<number>(0);
+  const [count, setCount] = useState<number>(0)
 
+  // Estado para armazenar erros
   const [error, setError] = useState<IAppError | null>(null)
 
   // Carregar a lista de clientes do banco de dados
   const fetchData = async () => {
-    ClientIPC.findAll(searchText, currentPage).then((res) => {
+    try {
+      const res = await ClientIPC.findAll(searchText, currentPage)
       setData(res.data)
       setCount(res.count)
-      setError(null);
-    }).catch((err: IAppError) => {
-      setError(err)
-    })
-  };
+      setError(null)
+    } catch (err) {
+      setError(err as IAppError)
+    }
+  }
 
   useEffect(() => {
     fetchData()
-  }, [searchText, currentPage]);
+  }, [searchText, currentPage])
 
-
-  // Função para recarregar a lista de cliente após novo cliente
+  // Função para recarregar a lista de clientes após adição de um novo cliente
   const onSaveClient = () => {
-    setSearchText("")
+    setSearchText('')
     setCurrentPage(1)
     fetchData()
   }
@@ -60,7 +65,7 @@ function Clients() {
     },
     {
       header: 'Telefone',
-      accessor: (data: Client) => formatPhoneNumber(data.phone),
+      accessor: (data: Client) => formatPhoneNumber(data.phone)
     },
     { header: 'Curso', accessor: (data: Client) => data.course },
     {
