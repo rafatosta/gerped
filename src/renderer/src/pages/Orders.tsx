@@ -8,7 +8,7 @@ import PaginationControls from "@renderer/components/PaginationControls";
 import Title from "@renderer/components/Title";
 import OrderIPC from "@renderer/ipc/OrderIPC";
 import formatDate from "@renderer/utils/formatDate";
-import { Badge, Button, Dropdown, FloatingLabel } from "flowbite-react";
+import { Badge, Button, Dropdown, FloatingLabel, Progress } from "flowbite-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -79,6 +79,17 @@ function Orders() {
             accessor: (data: Order) => formatDate(data.deliveryDate)
         },
         {
+            header: 'Progresso',
+            accessor: (data: Order) =>
+                data.countTask == 0 ?
+                    "-" :
+                    <Progress progress={100 * data.countTaskFinished / data.countTask}
+                        progressLabelPosition="outside"
+                        labelProgress
+                        size="sm"
+                    />
+        },
+        {
             header: 'Situação',
             accessor: (data: Order) => (
                 <Badge color={data.status === OrderStatus.ATIVO ? "warning" : "success"} className="flex justify-center items-center">
@@ -87,7 +98,7 @@ function Orders() {
             ),
         },
         {
-            header: 'Ações',
+            header: '',
             accessor: (data: Order) => (
                 <Link to={`/orders/${data.id}`} className="font-medium text-cyan-600 hover:underline">
                     Visualizar
