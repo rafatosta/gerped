@@ -69,7 +69,7 @@ function Clients() {
     },
     { header: 'Curso', accessor: (data: Client) => data.course },
     {
-      header: 'Ações',
+      header: '',
       accessor: (data: Client) => (
         <Link to={`/clients/${data.id}`} className="font-medium text-cyan-600 hover:underline">
           Visualizar
