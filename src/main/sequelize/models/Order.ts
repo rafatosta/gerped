@@ -18,7 +18,7 @@ export interface OrderAttributes {
     Service?: Service;
     Tasks?: Task[]
     countTask?: number;
-    countTaskActive?: number
+    countTaskFinished?: number
 }
 
 interface OrderCreationAttributes extends Optional<OrderAttributes, 'id'> { }
@@ -36,7 +36,7 @@ class Order extends Model<OrderAttributes, OrderCreationAttributes> implements O
     public Service!: Service;
     public Tasks!: Task[]
     public countTask!: number;
-    public countTaskActive!: number
+    public countTaskFinished!: number
 
 
     // timestamps!

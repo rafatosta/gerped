@@ -50,7 +50,7 @@ class OrderDAO {
         c.name AS clientName,
         s.description AS serviceDescription,
         (SELECT COUNT(*) FROM Tasks t WHERE t.idOrder = o.id) AS countTask,
-        (SELECT COUNT(*) FROM Tasks t WHERE t.idOrder = o.id AND t.status = 1) AS countTaskActive
+        (SELECT COUNT(*) FROM Tasks t WHERE t.idOrder = o.id AND t.status = 2) AS countTaskFinished
       FROM Orders o
       LEFT JOIN Clients c ON o.idClient = c.id
       LEFT JOIN Services s ON o.idService = s.id
@@ -95,7 +95,7 @@ class OrderDAO {
           description: order.serviceDescription
         },
         countTask: order.countTask,
-        countTaskActive: order.countTaskActive
+        countTaskFinished: order.countTaskFinished
       }));
 
       return { data: transformedData as OrderAttributes[], count: count as number };
