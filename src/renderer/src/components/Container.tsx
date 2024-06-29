@@ -6,7 +6,7 @@ interface ContainerProps {
 
 const Container: React.FC<ContainerProps> = ({ children }) => {
   return (
-    <div className="overflow-x-auto flex flex-col justify-center gap-2 p-4 max-h-screen">
+    <div className="overflow-x-auto flex flex-col justify-start gap-2 p-4 min-h-screen">
       {children}
     </div>
   )
