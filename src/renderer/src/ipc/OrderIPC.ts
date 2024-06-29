@@ -5,9 +5,9 @@ import { parseError } from "@renderer/utils/parseError";
 class OrderIPC {
 
   static async findAll(
-    searchText: string,
-    currentPage: number,
-    filterStatus: OrderStatus
+    searchText?: string,
+    currentPage?: number,
+    filterStatus?: OrderStatus
   ): Promise<{ data: Order[]; count: number }> {
     try {
       return await window.electron.ipcRenderer.invoke('order:findAll', searchText, currentPage, filterStatus);
