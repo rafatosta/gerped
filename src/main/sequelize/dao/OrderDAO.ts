@@ -55,7 +55,7 @@ class OrderDAO {
       LEFT JOIN Clients c ON o.idClient = c.id
       LEFT JOIN Services s ON o.idService = s.id
       WHERE ${whereClause}
-      ORDER BY o.deliveryDate DESC
+      ORDER BY o.deliveryDate ASC
       LIMIT :limit OFFSET :offset;
     `;
 
