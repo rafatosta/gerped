@@ -55,7 +55,7 @@ const Calendar: React.FC<CalendarProps> = ({ currentDate, orders }) => {
     for (let i = 0; i < 7; i++) {
       weekDaysElements.push(
         <div key={i} className="p-2 bg-gray-200 text-center font-semibold h-fit">
-          {format(addDays(startOfWeek(currentDate), i), 'EEEE', {locale: ptBR})}
+          {format(addDays(startOfWeek(currentDate), i), 'EEEEEE', {locale: ptBR}).toUpperCase()}
         </div>
       );
     }
