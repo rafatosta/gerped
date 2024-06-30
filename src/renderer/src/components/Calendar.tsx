@@ -1,9 +1,16 @@
 import React from 'react';
 import { startOfMonth, endOfMonth, eachDayOfInterval, format, isSameDay, startOfWeek, endOfWeek, addDays } from 'date-fns';
+import Order from '@backend/models/Order';
+
+import { ptBR } from "date-fns/locale";
 
 interface CalendarProps {
   currentDate: Date;
   orders: Order[];
+}
+
+function classNames(...classes: string[] | any) {
+  return classes.filter(Boolean).join(' ')
 }
 
 const Calendar: React.FC<CalendarProps> = ({ currentDate, orders }) => {
@@ -23,7 +30,11 @@ const Calendar: React.FC<CalendarProps> = ({ currentDate, orders }) => {
     let day = startDay;
     while (day <= endDay) {
       daysElements.push(
-        <div key={day.toISOString()} className="p-2 border rounded h-full flex flex-col">
+        <div key={day.toISOString()}
+          className={classNames("p-2 border rounded h-full flex flex-col",
+            start.getMonth() != day.getMonth() ? "bg-gray-50" : ""
+          )}
+        >
           <div className="font-semibold text-right">{format(day, 'd')}</div>
           <ul className="mt-2 space-y-1 overflow-auto">
             {getOrdersForDay(day).map(order => (
@@ -43,8 +54,8 @@ const Calendar: React.FC<CalendarProps> = ({ currentDate, orders }) => {
     const weekDaysElements: JSX.Element[] = [];
     for (let i = 0; i < 7; i++) {
       weekDaysElements.push(
-        <div key={i} className="p-2 bg-gray-200 text-center font-semibold">
-          {format(addDays(startOfWeek(currentDate), i), 'EEEE')}
+        <div key={i} className="p-2 bg-gray-200 text-center font-semibold h-fit">
+          {format(addDays(startOfWeek(currentDate), i), 'EEEE', {locale: ptBR})}
         </div>
       );
     }
@@ -52,10 +63,15 @@ const Calendar: React.FC<CalendarProps> = ({ currentDate, orders }) => {
   };
 
   return (
-    <div className="flex-1 grid grid-cols-7 gap-1">
-      {renderWeekDays()}
-      {renderDays()}
-    </div>
+    <>
+      <div className="grid grid-cols-7 gap-1">
+        {renderWeekDays()}
+      </div>
+      <div className="flex-1 grid grid-cols-7 gap-1">
+        {renderDays()}
+      </div>
+    </>
+
   );
 };
 
