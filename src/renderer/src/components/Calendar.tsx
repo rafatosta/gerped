@@ -2,18 +2,13 @@ import React from 'react';
 import { startOfMonth, endOfMonth, eachDayOfInterval, format, isSameDay, startOfWeek, endOfWeek, addDays } from 'date-fns';
 import Order from '@backend/models/Order';
 
-import { ptBR } from "date-fns/locale";
-
 interface CalendarProps {
   currentDate: Date;
+  firstOrderDate: Date | null;
   orders: Order[];
 }
 
-function classNames(...classes: string[] | any) {
-  return classes.filter(Boolean).join(' ')
-}
-
-const Calendar: React.FC<CalendarProps> = ({ currentDate, orders }) => {
+const Calendar: React.FC<CalendarProps> = ({ currentDate, firstOrderDate, orders }) => {
   const start = startOfMonth(currentDate);
   const end = endOfMonth(currentDate);
   const days = eachDayOfInterval({ start, end });
@@ -29,17 +24,13 @@ const Calendar: React.FC<CalendarProps> = ({ currentDate, orders }) => {
     const daysElements: JSX.Element[] = [];
     let day = startDay;
     while (day <= endDay) {
+      const isFirstOrderDay = firstOrderDate && isSameDay(day, firstOrderDate);
       daysElements.push(
-        <div key={day.toISOString()}
-          className={classNames("p-2 border-r border-b h-full flex flex-col",
-            start.getMonth() != day.getMonth() ? "bg-gray-50" : ""
-          )}
+        <div 
+          key={day.toISOString()} 
+          className={`p-2 border rounded h-24 flex flex-col ${isFirstOrderDay ? 'bg-yellow-200' : ''}`}
         >
-          <div
-            className="text-xs text-gray-800 font-semibold text-right"
-          >
-            {format(day, 'd')}
-          </div>
+          <div className="font-semibold text-right">{format(day, 'd')}</div>
           <ul className="mt-2 space-y-1 overflow-auto">
             {getOrdersForDay(day).map(order => (
               <li key={order.id} className="text-sm text-blue-500">
@@ -58,8 +49,8 @@ const Calendar: React.FC<CalendarProps> = ({ currentDate, orders }) => {
     const weekDaysElements: JSX.Element[] = [];
     for (let i = 0; i < 7; i++) {
       weekDaysElements.push(
-        <div key={i} className="text-center font-semibold h-fit">
-          {format(addDays(startOfWeek(currentDate), i), 'EEEEEE', { locale: ptBR })}
+        <div key={i} className="p-2 bg-gray-200 text-center font-semibold">
+          {format(addDays(startOfWeek(currentDate), i), 'EEEE')}
         </div>
       );
     }
@@ -67,15 +58,10 @@ const Calendar: React.FC<CalendarProps> = ({ currentDate, orders }) => {
   };
 
   return (
-    <>
-      <div className="grid grid-cols-7 gap-x-1">
-        {renderWeekDays()}
-      </div>
-      <div className="flex-1 grid grid-cols-7 border-l border-t">
-        {renderDays()}
-      </div>
-    </>
-
+    <div className="flex-1 grid grid-cols-7 gap-1">
+      {renderWeekDays()}
+      {renderDays()}
+    </div>
   );
 };
 

@@ -1,5 +1,6 @@
 import React from 'react';
-import { format, addMonths, subMonths, setMonth, setYear, getYear, getMonth } from 'date-fns';
+import {  addMonths, subMonths, setMonth, setYear, getYear, getMonth } from 'date-fns';
+import { Dropdown } from 'flowbite-react';
 
 interface CalendarHeaderProps {
   currentDate: Date;
@@ -18,13 +19,13 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({ currentDate, onDateChan
   const handlePrevMonth = () => onDateChange(subMonths(currentDate, 1));
   const handleNextMonth = () => onDateChange(addMonths(currentDate, 1));
 
-  const handleMonthChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const newDate = setMonth(currentDate, parseInt(event.target.value));
+  const handleMonthChange = (month: number) => {
+    const newDate = setMonth(currentDate, month);
     onDateChange(newDate);
   };
 
-  const handleYearChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const newDate = setYear(currentDate, parseInt(event.target.value));
+  const handleYearChange = (year: number) => {
+    const newDate = setYear(currentDate, year);
     onDateChange(newDate);
   };
 
@@ -43,28 +44,20 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({ currentDate, onDateChan
         {'<'}
       </button>
       <div className="flex items-center space-x-2">
-        <select
-          value={currentDate.getMonth()}
-          onChange={handleMonthChange}
-          className="px-2 py-1 bg-gray-200 rounded"
-        >
+        <Dropdown label={months[getMonth(currentDate)]} className="px-2 py-1 bg-gray-200 rounded">
           {months.map((month, index) => (
-            <option key={index} value={index}>
+            <Dropdown.Item key={index} onClick={() => handleMonthChange(index)}>
               {month}
-            </option>
+            </Dropdown.Item>
           ))}
-        </select>
-        <select
-          value={currentDate.getFullYear()}
-          onChange={handleYearChange}
-          className="px-2 py-1 bg-gray-200 rounded"
-        >
+        </Dropdown>
+        <Dropdown label={getYear(currentDate).toString()} className="px-2 py-1 bg-gray-200 rounded">
           {years.map((year) => (
-            <option key={year} value={year}>
+            <Dropdown.Item key={year} onClick={() => handleYearChange(year)}>
               {year}
-            </option>
+            </Dropdown.Item>
           ))}
-        </select>
+        </Dropdown>
       </div>
       <button 
         onClick={handleNextMonth} 
