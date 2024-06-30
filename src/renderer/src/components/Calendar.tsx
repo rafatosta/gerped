@@ -31,11 +31,15 @@ const Calendar: React.FC<CalendarProps> = ({ currentDate, orders }) => {
     while (day <= endDay) {
       daysElements.push(
         <div key={day.toISOString()}
-          className={classNames("p-2 border rounded h-full flex flex-col",
+          className={classNames("p-2 border-r border-b h-full flex flex-col",
             start.getMonth() != day.getMonth() ? "bg-gray-50" : ""
           )}
         >
-          <div className="font-semibold text-right">{format(day, 'd')}</div>
+          <div
+            className="text-xs text-gray-800 font-semibold text-right"
+          >
+            {format(day, 'd')}
+          </div>
           <ul className="mt-2 space-y-1 overflow-auto">
             {getOrdersForDay(day).map(order => (
               <li key={order.id} className="text-sm text-blue-500">
@@ -54,8 +58,8 @@ const Calendar: React.FC<CalendarProps> = ({ currentDate, orders }) => {
     const weekDaysElements: JSX.Element[] = [];
     for (let i = 0; i < 7; i++) {
       weekDaysElements.push(
-        <div key={i} className="p-2 bg-gray-200 text-center font-semibold h-fit">
-          {format(addDays(startOfWeek(currentDate), i), 'EEEEEE', {locale: ptBR}).toUpperCase()}
+        <div key={i} className="text-center font-semibold h-fit">
+          {format(addDays(startOfWeek(currentDate), i), 'EEEEEE', { locale: ptBR })}
         </div>
       );
     }
@@ -64,10 +68,10 @@ const Calendar: React.FC<CalendarProps> = ({ currentDate, orders }) => {
 
   return (
     <>
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-7 gap-x-1">
         {renderWeekDays()}
       </div>
-      <div className="flex-1 grid grid-cols-7 gap-1">
+      <div className="flex-1 grid grid-cols-7 border-l border-t">
         {renderDays()}
       </div>
     </>
