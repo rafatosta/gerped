@@ -1,5 +1,5 @@
 import React from 'react';
-import {  addMonths, subMonths, setMonth, setYear, getYear, getMonth } from 'date-fns';
+import { format, addMonths, subMonths, setMonth, setYear, getYear, getMonth } from 'date-fns';
 import { Dropdown } from 'flowbite-react';
 
 interface CalendarHeaderProps {
