@@ -7,8 +7,9 @@ import Order from '@backend/models/Order';
 import { OrderStatus } from '@backend/enums/OrderStatus';
 import OrderIPC from '@renderer/ipc/OrderIPC';
 
+
 const Home: React.FC = () => {
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState<Date | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [count, setCount] = useState<number>(0);
   const [startYear, setStartYear] = useState<number>(new Date().getFullYear());
@@ -23,12 +24,24 @@ const Home: React.FC = () => {
       const deliveryDates = res.data.map(order => new Date(order.deliveryDate));
       const minYear = Math.min(...deliveryDates.map(date => date.getFullYear()));
       const maxYear = Math.max(...deliveryDates.map(date => date.getFullYear()));
-      
+
       setStartYear(minYear);
       setEndYear(maxYear);
 
+      if (res.data.length > 0) {
+        setCurrentDate(new Date(res.data[0].deliveryDate));
+      } else {
+        setCurrentDate(new Date());
+      }
+
     } catch (err: unknown) {
       console.log(err);
+    }
+  };
+
+  const goToFirstOrder = () => {
+    if (orders.length > 0) {
+      setCurrentDate(new Date(orders[0].deliveryDate));
     }
   };
 
@@ -39,13 +52,18 @@ const Home: React.FC = () => {
   return (
     <Container>
       <Title disabled>Home Page</Title>
-      <CalendarHeader 
-        currentDate={currentDate} 
-        onDateChange={setCurrentDate} 
-        startYear={startYear} 
-        endYear={endYear} 
-      />
-      <Calendar currentDate={currentDate} orders={orders} />
+      {currentDate && (
+        <>
+          <CalendarHeader
+            currentDate={currentDate}
+            onDateChange={setCurrentDate}
+            startYear={startYear}
+            endYear={endYear}
+            goToFirstOrder={goToFirstOrder}
+          />
+          <Calendar currentDate={currentDate} orders={orders} />
+        </>
+      )}
     </Container>
   );
 }

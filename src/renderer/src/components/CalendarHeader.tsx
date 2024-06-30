@@ -6,6 +6,7 @@ interface CalendarHeaderProps {
   onDateChange: (date: Date) => void;
   startYear: number;
   endYear: number;
+  goToFirstOrder: () => void;
 }
 
 const months = [
@@ -13,10 +14,9 @@ const months = [
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
 ];
 
-const CalendarHeader: React.FC<CalendarHeaderProps> = ({ currentDate, onDateChange, startYear, endYear }) => {
+const CalendarHeader: React.FC<CalendarHeaderProps> = ({ currentDate, onDateChange, startYear, endYear, goToFirstOrder }) => {
   const handlePrevMonth = () => onDateChange(subMonths(currentDate, 1));
   const handleNextMonth = () => onDateChange(addMonths(currentDate, 1));
-  const handleToday = () => onDateChange(new Date());
 
   const handleMonthChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const newDate = setMonth(currentDate, parseInt(event.target.value));
@@ -73,8 +73,8 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({ currentDate, onDateChan
       >
         {'>'}
       </button>
-      <button onClick={handleToday} className="ml-4 px-4 py-2 bg-blue-500 text-white rounded">
-        Hoje
+      <button onClick={goToFirstOrder} className="ml-4 px-4 py-2 bg-blue-500 text-white rounded">
+        Primeira Ordem
       </button>
     </div>
   );
