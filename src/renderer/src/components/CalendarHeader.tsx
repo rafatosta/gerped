@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { format, addMonths, subMonths, setMonth, setYear, getYear, getMonth } from 'date-fns';
 import { Dropdown } from 'flowbite-react';
 
@@ -33,6 +33,22 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({ currentDate, onDateChan
 
   const isPrevDisabled = getYear(currentDate) === startYear && getMonth(currentDate) === 0;
   const isNextDisabled = getYear(currentDate) === endYear && getMonth(currentDate) === 11;
+
+  const handleScroll = (event: WheelEvent) => {
+    if (event.deltaY < 0) {
+      handlePrevMonth();
+    } else if (event.deltaY > 0) {
+      handleNextMonth();
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener('wheel', handleScroll);
+
+    return () => {
+      window.removeEventListener('wheel', handleScroll);
+    };
+  }, [currentDate]);
 
   return (
     <div className="flex justify-between items-center py-4">
