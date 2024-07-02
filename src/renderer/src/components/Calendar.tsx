@@ -1,5 +1,5 @@
-import React from 'react';
-import { startOfMonth, endOfMonth, eachDayOfInterval, format, isSameDay, startOfWeek, endOfWeek, addDays, differenceInDays } from 'date-fns';
+
+import { startOfMonth, endOfMonth, format, isSameDay, startOfWeek, endOfWeek, addDays, differenceInDays } from 'date-fns';
 import Order from '@backend/models/Order';
 import { ptBR } from "date-fns/locale";
 
@@ -29,10 +29,10 @@ const getEventClass = (deliveryDate: Date, firstOrderDate: Date): string => {
 
 
 
-function Calendar({ currentDate, firstOrderDate, orders }) {
+function Calendar({ currentDate, firstOrderDate, orders }: CalendarProps) {
   const start = startOfMonth(currentDate);
   const end = endOfMonth(currentDate);
-  const days = eachDayOfInterval({ start, end });
+  //const days = eachDayOfInterval({ start, end });
 
   const startDay = startOfWeek(start);
   const endDay = endOfWeek(end);
@@ -62,7 +62,7 @@ function Calendar({ currentDate, firstOrderDate, orders }) {
         >
           <div className="text-xs text-gray-800 font-semibold text-left">
             {format(day, 'd')}
-            {format(day, 'd')=='1' && <span> {format(day,'MMM', { locale: ptBR })}</span>}
+            {format(day, 'd') == '1' && <span> {format(day, 'MMM', { locale: ptBR })}</span>}
           </div>
           <ul className="mt-2 space-y-1 overflow-auto">
             {getOrdersForDay(day).map(order => (
@@ -97,6 +97,10 @@ function Calendar({ currentDate, firstOrderDate, orders }) {
 
   return (
     <div className='flex flex-col h-full'>
+      <div className='flex justify-between items-center'>
+        <p className='font-bold text-blue-600 text-xl'>{format(currentDate, 'MMMM', { locale: ptBR })}</p>
+        <p className='font-bold text-gray-600 text-xl'>{format(currentDate, 'yyyy')}</p>
+      </div>
       <div className="grid grid-cols-7">
         {renderWeekDays()}
       </div>
