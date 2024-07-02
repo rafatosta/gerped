@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { addMonths, subMonths, setMonth, setYear, getYear, getMonth } from 'date-fns';
 import { Dropdown } from 'flowbite-react';
+import { MdNavigateBefore, MdNavigateNext } from "react-icons/md";
 
 interface CalendarHeaderProps {
   currentDate: Date;
@@ -9,7 +10,7 @@ interface CalendarHeaderProps {
   endYear: number;
 }
 
-const months = [
+export const months = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
 ];
@@ -62,23 +63,34 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({ currentDate, onDateChan
   }, [currentDate]);
 
   return (
-    <div className="flex justify-between items-center py-4">
+    <div className="flex justify-center items-center gap-4">
       <button
         onClick={handlePrevMonth}
-        className="px-4 py-2 bg-gray-200 rounded"
+        className="p-2 hover:bg-gray-100 rounded-full"
         disabled={isPrevDisabled}
       >
-        {'< recuar'}
+        <MdNavigateBefore />
       </button>
       <div className="flex items-center space-x-2">
-        <Dropdown label={months[getMonth(currentDate)]} className="px-2 py-1 bg-gray-200 rounded">
+        <Dropdown label=""
+          renderTrigger={() =>
+            <span className='font-semibold text-lg cursor-pointer'>
+              {months[getMonth(currentDate)]}
+            </span>
+          }
+        >
           {months.map((month, index) => (
             <Dropdown.Item key={index} onClick={() => handleMonthChange(index)}>
               {month}
             </Dropdown.Item>
           ))}
         </Dropdown>
-        <Dropdown label={getYear(currentDate).toString()} className="px-2 py-1 bg-gray-200 rounded">
+        <Dropdown label=""
+          renderTrigger={() =>
+            <span className='font-semibold text-lg cursor-pointer'>
+              {getYear(currentDate).toString()}
+            </span>}
+        >
           {years.map((year) => (
             <Dropdown.Item key={year} onClick={() => handleYearChange(year)}>
               {year}
@@ -88,10 +100,10 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({ currentDate, onDateChan
       </div>
       <button
         onClick={handleNextMonth}
-        className="px-4 py-2 bg-gray-200 rounded"
+        className="p-2 hover:bg-gray-100 rounded-full"
         disabled={isNextDisabled}
       >
-        {'Avançar >'}
+        <MdNavigateNext />
       </button>
     </div>
   );

@@ -67,17 +67,25 @@ const Home: React.FC = () => {
 
   return (
     <Container >
-      <div className="flex justify-between items-center gap-4">
+      {/* <div className="flex justify-between items-center gap-4">
         <Title disabled>Seus Pedidos</Title>
         <p className="text-gray-500 text-lg">{count} pedidos</p>
+      </div> */}
+      <div className='grid grid-cols-3 h-full gap-x-4'>
+        <div>
+          <CalendarHeader
+            currentDate={currentDate}
+            onDateChange={setCurrentDate}
+            startYear={startYear}
+            endYear={endYear}
+          />
+        </div>
+        <div className='col-span-2'>
+          <Calendar currentDate={currentDate} firstOrderDate={firstOrderDate} orders={orders} goToFirstOrder={goToFirstOrder} />
+        </div>
+
       </div>
-      <CalendarHeader
-        currentDate={currentDate}
-        onDateChange={setCurrentDate}
-        startYear={startYear}
-        endYear={endYear}
-      />
-      <Calendar currentDate={currentDate} firstOrderDate={firstOrderDate} orders={orders} goToFirstOrder={goToFirstOrder} />
+
     </Container>
   );
 }
