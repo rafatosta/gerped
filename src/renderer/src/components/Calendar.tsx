@@ -1,9 +1,10 @@
 
-import { startOfMonth, endOfMonth, format, isSameDay, startOfWeek, endOfWeek, addDays, differenceInDays } from 'date-fns';
+import { startOfMonth, endOfMonth, format, isSameDay, startOfWeek, endOfWeek, addDays, differenceInDays, getMonth } from 'date-fns';
 import { LuCalendarClock, LuCalendarPlus } from "react-icons/lu";
 import Order from '@backend/models/Order';
 import { ptBR } from "date-fns/locale";
 import { Link } from 'react-router-dom';
+import { months } from './CalendarHeader';
 
 interface CalendarProps {
   currentDate: Date;
@@ -109,7 +110,7 @@ function Calendar({ currentDate, firstOrderDate, orders, goToFirstOrder }: Calen
         </Link>
       </div>
       <div className='flex justify-between items-center'>
-        <p className='font-bold text-blue-600 text-xl'>{format(currentDate, 'MMMM', { locale: ptBR })}</p>
+        <p className='font-bold text-blue-600 text-xl'>{months[getMonth(currentDate)]}</p>
         <p className='font-bold text-gray-600 text-xl'>{format(currentDate, 'yyyy')}</p>
       </div>
       <div className="grid grid-cols-7">
