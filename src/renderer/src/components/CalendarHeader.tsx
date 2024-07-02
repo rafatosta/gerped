@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { format, addMonths, subMonths, setMonth, setYear, getYear, getMonth } from 'date-fns';
+import { addMonths, subMonths, setMonth, setYear, getYear, getMonth } from 'date-fns';
 import { Dropdown } from 'flowbite-react';
 
 interface CalendarHeaderProps {
@@ -7,7 +7,6 @@ interface CalendarHeaderProps {
   onDateChange: (date: Date) => void;
   startYear: number;
   endYear: number;
-  goToFirstOrder: () => void;
 }
 
 const months = [
@@ -15,7 +14,7 @@ const months = [
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
 ];
 
-const CalendarHeader: React.FC<CalendarHeaderProps> = ({ currentDate, onDateChange, startYear, endYear, goToFirstOrder }) => {
+const CalendarHeader: React.FC<CalendarHeaderProps> = ({ currentDate, onDateChange, startYear, endYear }) => {
 
   const handlePrevMonth = () => {
     const newDate = subMonths(currentDate, 1);
@@ -93,9 +92,6 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({ currentDate, onDateChan
         disabled={isNextDisabled}
       >
         {'Avançar >'}
-      </button>
-      <button onClick={goToFirstOrder} className="ml-4 px-4 py-2 bg-blue-500 text-white rounded">
-        Primeira Ordem
       </button>
     </div>
   );

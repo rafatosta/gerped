@@ -76,9 +76,8 @@ const Home: React.FC = () => {
         onDateChange={setCurrentDate}
         startYear={startYear}
         endYear={endYear}
-        goToFirstOrder={goToFirstOrder}
       />
-      <Calendar currentDate={currentDate} firstOrderDate={firstOrderDate} orders={orders} />
+      <Calendar currentDate={currentDate} firstOrderDate={firstOrderDate} orders={orders} goToFirstOrder={goToFirstOrder} />
     </Container>
   );
 }

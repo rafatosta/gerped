@@ -1,12 +1,15 @@
 
 import { startOfMonth, endOfMonth, format, isSameDay, startOfWeek, endOfWeek, addDays, differenceInDays } from 'date-fns';
+import { LuCalendarClock, LuCalendarPlus } from "react-icons/lu";
 import Order from '@backend/models/Order';
 import { ptBR } from "date-fns/locale";
+import { Link } from 'react-router-dom';
 
 interface CalendarProps {
   currentDate: Date;
   firstOrderDate: Date | null;
   orders: Order[];
+  goToFirstOrder: () => void;
 }
 
 function classNames(...classes: string[] | any) {
@@ -27,9 +30,7 @@ const getEventClass = (deliveryDate: Date, firstOrderDate: Date): string => {
   }
 };
 
-
-
-function Calendar({ currentDate, firstOrderDate, orders }: CalendarProps) {
+function Calendar({ currentDate, firstOrderDate, orders, goToFirstOrder }: CalendarProps) {
   const start = startOfMonth(currentDate);
   const end = endOfMonth(currentDate);
   //const days = eachDayOfInterval({ start, end });
@@ -97,6 +98,16 @@ function Calendar({ currentDate, firstOrderDate, orders }: CalendarProps) {
 
   return (
     <div className='flex flex-col h-full'>
+      <div className='flex justify-between items-center'>
+        <button onClick={goToFirstOrder} className="font-medium text-gray-600 hover:text-gray-900 flex items-center gap-2">
+          <LuCalendarClock />
+          Próximo pedido
+        </button>
+        <Link to={'/orders/create'} className="font-medium text-gray-600 hover:text-gray-900 flex items-center gap-2">
+          <LuCalendarPlus />
+          Novo
+        </Link>
+      </div>
       <div className='flex justify-between items-center'>
         <p className='font-bold text-blue-600 text-xl'>{format(currentDate, 'MMMM', { locale: ptBR })}</p>
         <p className='font-bold text-gray-600 text-xl'>{format(currentDate, 'yyyy')}</p>
