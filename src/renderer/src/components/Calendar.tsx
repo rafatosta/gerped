@@ -55,7 +55,7 @@ function Calendar({ currentDate, firstOrderDate, orders }: CalendarProps) {
         <div
           key={day.toISOString()}
           className={
-            classNames(`p-2 border-r border-b h-full flex flex-col`,
+            classNames(`p-2 border-r border-b flex flex-col`,
               isFirstOrderDay ? 'bg-red-200' : '',
               start.getMonth() != day.getMonth() ? "bg-gray-100" : ""
             )}
@@ -68,7 +68,7 @@ function Calendar({ currentDate, firstOrderDate, orders }: CalendarProps) {
             {getOrdersForDay(day).map(order => (
               <li key={order.id}
                 className={
-                  classNames("px-2 py-1 rounded-lg mt-1 overflow-hidden border",
+                  classNames("px-2 py-1 text-nowrap md:text-sm sm:text-xs rounded-lg mt-1 overflow-hidden border",
                     eventClass
                   )}
               >
