@@ -3,7 +3,6 @@ import Container from "@renderer/components/Container";
 import Title from "@renderer/components/Title";
 import CalendarHeader from "@renderer/components/CalendarHeader";
 import Calendar from "@renderer/components/Calendar";
-import { OrderStatus } from '@backend/enums/OrderStatus';
 
 import Order from '@backend/models/Order';
 import OrderIPC from '@renderer/ipc/OrderIPC';
@@ -18,7 +17,7 @@ const Home: React.FC = () => {
 
   const fetchData = async () => {
     try {
-      const res = await OrderIPC.findAll(undefined, undefined, OrderStatus.ATIVO);
+      const res = await OrderIPC.findAllPeding();
       setOrders(res.data);
       setCount(res.count);
 

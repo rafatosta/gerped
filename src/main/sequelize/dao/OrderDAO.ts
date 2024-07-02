@@ -110,6 +110,80 @@ class OrderDAO {
     }
   }
 
+  static async findAllPeding(): Promise<{ data: OrderAttributes[]; count: number }> {
+    let whereClause = '1=1'; // Cláusula where inicial
+
+    whereClause += ` AND status = 1`;
+
+    const query = `
+      SELECT 
+        o.id,
+        o.idClient,
+        o.idService,
+        o.theme,
+        o.orderDate,
+        o.deliveryDate,
+        o.price,
+        o.status,
+        c.name AS clientName,
+        s.description AS serviceDescription,
+        (SELECT COUNT(*) FROM Tasks t WHERE t.idOrder = o.id) AS countTask,
+        (SELECT COUNT(*) FROM Tasks t WHERE t.idOrder = o.id AND t.status = 2) AS countTaskFinished
+      FROM Orders o
+      LEFT JOIN Clients c ON o.idClient = c.id
+      LEFT JOIN Services s ON o.idService = s.id
+      WHERE ${whereClause}
+      ORDER BY o.deliveryDate ASC
+    `;
+
+    const countQuery = `
+      SELECT 
+        COUNT(*) as count
+      FROM Orders o
+      LEFT JOIN Clients c ON o.idClient = c.id
+      WHERE ${whereClause};
+    `;
+
+    try {
+      const [data, countResult] = await Promise.all([
+        sequelize.query(query, { type: QueryTypes.SELECT }),
+        sequelize.query(countQuery, { type: QueryTypes.SELECT })
+      ]);
+
+      const count = (countResult[0] as any).count;
+
+      // Transformar os resultados para a estrutura desejada
+      const transformedData = (data as any[]).map((order) => ({
+        id: order.id,
+        idClient: order.idClient,
+        idService: order.idService,
+        theme: order.theme,
+        orderDate: order.orderDate,
+        deliveryDate: order.deliveryDate,
+        price: order.price,
+        status: order.status,
+        Client: {
+          name: order.clientName
+        },
+        Service: {
+          description: order.serviceDescription
+        },
+        countTask: order.countTask,
+        countTaskFinished: order.countTaskFinished
+      }));
+
+      return { data: transformedData as OrderAttributes[], count: count as number };
+    } catch (error) {
+      console.error('Erro ao buscar ordens:', error);
+      const appError: IAppError = {
+        message: 'Não foi possível buscar as ordens',
+        code: 'ERRO_BUSCA_ORDENS',
+        details: error as SQLiteError,
+      };
+      throw new Error(JSON.stringify(appError));
+    }
+  }
+
   // Método estático para buscar uma ordem pelo ID
   static async findById(id: number): Promise<Order | null> {
     try {

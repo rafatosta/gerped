@@ -100,6 +100,10 @@ app.whenReady().then(() => {
     return OrderDAO.findAll(searchText, page, filterStatus)
   })
 
+  ipcMain.handle('order:findAllPeding', async (_) => {
+    return OrderDAO.findAllPeding()
+  })
+
   ipcMain.handle('order:findById', async (_, id) => {
     return OrderDAO.findById(id)
   })

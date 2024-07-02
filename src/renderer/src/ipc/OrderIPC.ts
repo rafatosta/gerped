@@ -16,6 +16,15 @@ class OrderIPC {
     }
   }
 
+  static async findAllPeding(): Promise<{ data: Order[]; count: number }> {
+    try {
+      return await window.electron.ipcRenderer.invoke('order:findAllPeding');
+    } catch (err) {
+      throw parseError(err);
+    }
+  }
+
+
   static async findById(id: string): Promise<Order> {
     try {
       return await window.electron.ipcRenderer.invoke('order:findById', id);
