@@ -16,8 +16,20 @@ const months = [
 ];
 
 const CalendarHeader: React.FC<CalendarHeaderProps> = ({ currentDate, onDateChange, startYear, endYear, goToFirstOrder }) => {
-  const handlePrevMonth = () => onDateChange(subMonths(currentDate, 1));
-  const handleNextMonth = () => onDateChange(addMonths(currentDate, 1));
+
+  const handlePrevMonth = () => {
+    const newDate = subMonths(currentDate, 1);
+    if (!isPrevDisabled) {
+      onDateChange(newDate);
+    }
+  };
+
+  const handleNextMonth = () => {
+    const newDate = addMonths(currentDate, 1);
+    if (!isNextDisabled) {
+      onDateChange(newDate);
+    }
+  };
 
   const handleMonthChange = (month: number) => {
     const newDate = setMonth(currentDate, month);
@@ -52,12 +64,12 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({ currentDate, onDateChan
 
   return (
     <div className="flex justify-between items-center py-4">
-      <button 
-        onClick={handlePrevMonth} 
-        className="px-4 py-2 bg-gray-200 rounded" 
+      <button
+        onClick={handlePrevMonth}
+        className="px-4 py-2 bg-gray-200 rounded"
         disabled={isPrevDisabled}
       >
-        {'<'}
+        {'< recuar'}
       </button>
       <div className="flex items-center space-x-2">
         <Dropdown label={months[getMonth(currentDate)]} className="px-2 py-1 bg-gray-200 rounded">
@@ -75,12 +87,12 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({ currentDate, onDateChan
           ))}
         </Dropdown>
       </div>
-      <button 
-        onClick={handleNextMonth} 
-        className="px-4 py-2 bg-gray-200 rounded" 
+      <button
+        onClick={handleNextMonth}
+        className="px-4 py-2 bg-gray-200 rounded"
         disabled={isNextDisabled}
       >
-        {'>'}
+        {'Avançar >'}
       </button>
       <button onClick={goToFirstOrder} className="ml-4 px-4 py-2 bg-blue-500 text-white rounded">
         Primeira Ordem
