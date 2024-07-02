@@ -1,6 +1,7 @@
 import React from 'react';
-import { startOfMonth, endOfMonth, eachDayOfInterval, format, isSameDay, startOfWeek, endOfWeek, addDays } from 'date-fns';
+import { startOfMonth, endOfMonth, eachDayOfInterval, format, isSameDay, startOfWeek, endOfWeek, addDays, differenceInDays } from 'date-fns';
 import Order from '@backend/models/Order';
+import { ptBR } from "date-fns/locale";
 
 interface CalendarProps {
   currentDate: Date;
@@ -8,7 +9,27 @@ interface CalendarProps {
   orders: Order[];
 }
 
-const Calendar: React.FC<CalendarProps> = ({ currentDate, firstOrderDate, orders }) => {
+function classNames(...classes: string[] | any) {
+  return classes.filter(Boolean).join(' ')
+}
+
+const getEventClass = (deliveryDate: Date, firstOrderDate: Date): string => {
+  const diffDays = differenceInDays(deliveryDate, firstOrderDate);
+
+  if (diffDays <= 7) {
+    return "border-red-200 text-red-800 bg-red-100";
+  } else if (diffDays <= 14) {
+    return "border-yellow-200 text-yellow-800 bg-yellow-100";
+  } else if (diffDays <= 30) {
+    return "border-green-200 text-green-800 bg-green-100";
+  } else {
+    return "border-blue-200 text-blue-800 bg-blue-100";
+  }
+};
+
+
+
+function Calendar({ currentDate, firstOrderDate, orders }) {
   const start = startOfMonth(currentDate);
   const end = endOfMonth(currentDate);
   const days = eachDayOfInterval({ start, end });
@@ -20,20 +41,37 @@ const Calendar: React.FC<CalendarProps> = ({ currentDate, firstOrderDate, orders
     return orders.filter(order => isSameDay(new Date(order.deliveryDate), day));
   };
 
+
+
   const renderDays = () => {
     const daysElements: JSX.Element[] = [];
     let day = startDay;
     while (day <= endDay) {
       const isFirstOrderDay = firstOrderDate && isSameDay(day, firstOrderDate);
+      const dayOrders = getOrdersForDay(day);
+      const eventClass = dayOrders.length > 0 && firstOrderDate ? getEventClass(dayOrders[0].deliveryDate, firstOrderDate) : '';
+
       daysElements.push(
-        <div 
-          key={day.toISOString()} 
-          className={`p-2 border rounded h-24 flex flex-col ${isFirstOrderDay ? 'bg-yellow-200' : ''}`}
+        <div
+          key={day.toISOString()}
+          className={
+            classNames(`p-2 border-r border-b h-full flex flex-col`,
+              isFirstOrderDay ? 'bg-red-200' : '',
+              start.getMonth() != day.getMonth() ? "bg-gray-100" : ""
+            )}
         >
-          <div className="font-semibold text-right">{format(day, 'd')}</div>
+          <div className="text-xs text-gray-800 font-semibold text-left">
+            {format(day, 'd')}
+            {format(day, 'd')=='1' && <span> {format(day,'MMM', { locale: ptBR })}</span>}
+          </div>
           <ul className="mt-2 space-y-1 overflow-auto">
             {getOrdersForDay(day).map(order => (
-              <li key={order.id} className="text-sm text-blue-500">
+              <li key={order.id}
+                className={
+                  classNames("px-2 py-1 rounded-lg mt-1 overflow-hidden border",
+                    eventClass
+                  )}
+              >
                 {order.Client?.name}
               </li>
             ))}
@@ -49,8 +87,8 @@ const Calendar: React.FC<CalendarProps> = ({ currentDate, firstOrderDate, orders
     const weekDaysElements: JSX.Element[] = [];
     for (let i = 0; i < 7; i++) {
       weekDaysElements.push(
-        <div key={i} className="p-2 bg-gray-200 text-center font-semibold">
-          {format(addDays(startOfWeek(currentDate), i), 'EEEE')}
+        <div key={i} className="p-2 text-start font-semibold h-fit text-sm text-gray-500">
+          {format(addDays(startOfWeek(currentDate), i), 'EEEEEE', { locale: ptBR }).toUpperCase()}
         </div>
       );
     }
@@ -58,10 +96,15 @@ const Calendar: React.FC<CalendarProps> = ({ currentDate, firstOrderDate, orders
   };
 
   return (
-    <div className="flex-1 grid grid-cols-7 gap-1">
-      {renderWeekDays()}
-      {renderDays()}
+    <div className='flex flex-col h-full'>
+      <div className="grid grid-cols-7">
+        {renderWeekDays()}
+      </div>
+      <div className="flex-1 grid grid-cols-7 border-l border-t">
+        {renderDays()}
+      </div>
     </div>
+
   );
 };
 
