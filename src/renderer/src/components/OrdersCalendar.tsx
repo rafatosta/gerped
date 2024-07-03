@@ -1,5 +1,5 @@
 
-import { startOfMonth, endOfMonth, format, isSameDay, startOfWeek, endOfWeek, addDays, differenceInDays } from 'date-fns';
+import { startOfMonth, endOfMonth, format, isSameDay, startOfWeek, endOfWeek, addDays, differenceInDays, startOfToday } from 'date-fns';
 
 import Order from '@backend/models/Order';
 import { ptBR } from "date-fns/locale";
@@ -68,7 +68,8 @@ function Calendar({ orders }: CalendarProps) {
             )}
         >
           <div className={classNames("text-xs p-1 font-semibold text-left",
-            isFirstOrderDay ? 'bg-blue-500 text-gray-100 rounded-full w-fit' : 'text-gray-800',
+            isFirstOrderDay ? 'bg-red-500 px-2 text-gray-100 rounded-full w-fit' : '',
+            startOfToday().toString() == day.toString() ? 'bg-blue-500 px-2 text-gray-100 rounded-full w-fit' : '',
           )}
 
           >
