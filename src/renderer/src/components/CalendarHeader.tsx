@@ -2,8 +2,9 @@ import React, { useEffect } from 'react';
 import { addMonths, subMonths, setMonth, setYear, getYear, getMonth } from 'date-fns';
 import { Dropdown } from 'flowbite-react';
 import { MdNavigateBefore, MdNavigateNext } from "react-icons/md";
-import { LuCalendarClock } from "react-icons/lu";
+import { LuCalendarClock, LuCalendarPlus } from "react-icons/lu";
 import { classNames } from '@renderer/utils/classNames';
+import { Link } from 'react-router-dom';
 
 interface CalendarHeaderProps {
   currentDate: Date;
@@ -68,12 +69,19 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({ currentDate, onDateChan
 
 
   return (
-    <div className="flex justify-between items-center gap-4">
+    <div className="grid grid-cols-3 justify-between items-center gap-4">
       <button onClick={goToFirstOrder} className="font-medium text-gray-600 hover:text-gray-900 flex items-center gap-2">
         <LuCalendarClock />
         Próximo pedido
       </button>
-      <div className='flex gap-2'>
+
+      <Link to={'/orders/create'}
+        className="font-medium text-gray-600 hover:text-gray-900 flex items-center gap-2 justify-center">
+        <LuCalendarPlus />
+        Criar pedido
+      </Link>
+
+      <div className='flex gap-2 justify-end'>
         <div className="flex items-center space-x-2">
           <Dropdown label=""
             renderTrigger={() =>
