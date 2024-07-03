@@ -1,9 +1,9 @@
 
-import { startOfMonth, endOfMonth, format, isSameDay, startOfWeek, endOfWeek, addDays, differenceInDays, getMonth } from 'date-fns';
+import { startOfMonth, endOfMonth, format, isSameDay, startOfWeek, endOfWeek, addDays, differenceInDays } from 'date-fns';
 
 import Order from '@backend/models/Order';
 import { ptBR } from "date-fns/locale";
-import CalendarHeader, { months } from './CalendarHeader';
+import CalendarHeader from './CalendarHeader';
 import { useEffect, useState } from 'react';
 
 interface CalendarProps {
