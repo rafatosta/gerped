@@ -83,7 +83,7 @@ function MontherCalendar({ currentDate, firstOrderDate, orders }: CalendarProps)
   return (
     <div className='flex flex-col overflow-x-hidden'>
       <h1 className='text-gray-700'>Pedidos do mês:</h1>
-      <div className="flex-1 w-[450px] overflow-y-auto">
+      <div className="flex-1 w-[350px]  overflow-y-auto">
         <div className="grid grid-flow-row ">
           {renderDays()}
         </div>
