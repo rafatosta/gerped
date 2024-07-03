@@ -5,13 +5,10 @@ import Order from '@backend/models/Order';
 import { ptBR } from "date-fns/locale";
 import CalendarHeader from './CalendarHeader';
 import { useEffect, useState } from 'react';
+import { classNames } from '@renderer/utils/classNames';
 
 interface CalendarProps {
   orders: Order[];
-}
-
-function classNames(...classes: string[] | any) {
-  return classes.filter(Boolean).join(' ')
 }
 
 const getEventClass = (deliveryDate: Date, firstOrderDate: Date): string => {
