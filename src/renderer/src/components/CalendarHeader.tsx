@@ -54,13 +54,13 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({ currentDate, onDateChan
     }
   };
 
-  useEffect(() => {
+  /* useEffect(() => {
     window.addEventListener('wheel', handleScroll);
 
     return () => {
       window.removeEventListener('wheel', handleScroll);
     };
-  }, [currentDate]);
+  }, [currentDate]); */
 
   return (
     <div className="flex justify-center items-center gap-4">
