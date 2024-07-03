@@ -3,6 +3,7 @@ import { addMonths, subMonths, setMonth, setYear, getYear, getMonth } from 'date
 import { Dropdown } from 'flowbite-react';
 import { MdNavigateBefore, MdNavigateNext } from "react-icons/md";
 import { LuCalendarClock } from "react-icons/lu";
+import { classNames } from '@renderer/utils/classNames';
 
 interface CalendarHeaderProps {
   currentDate: Date;
@@ -56,9 +57,6 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({ currentDate, onDateChan
     }
   };
 
-  function classNames(...classes: string[] | any) {
-    return classes.filter(Boolean).join(' ')
-  }
 
   useEffect(() => {
     window.addEventListener('wheel', handleScroll);
