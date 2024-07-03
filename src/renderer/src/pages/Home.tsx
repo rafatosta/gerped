@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import Container from "@renderer/components/Container";
 import OrdersCalendar from "@renderer/components/OrdersCalendar";
-import { Timeline } from "flowbite-react";
+import { Progress, Timeline } from "flowbite-react";
 
 import Order from '@backend/models/Order';
 import OrderIPC from '@renderer/ipc/OrderIPC';
 import { Link } from 'react-router-dom';
-import { format } from 'date-fns';
+import { format, startOfToday } from 'date-fns';
 import { ptBR } from "date-fns/locale";
 import { classNames } from '@renderer/utils/classNames';
 
 const Home: React.FC = () => {
+
+  const today = startOfToday();
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [count, setCount] = useState<number>(0);
@@ -52,14 +54,15 @@ const Home: React.FC = () => {
 
         {delayedOrders.length > 0 ? (
           <div className='flex flex-col gap-4  overflow-auto'>
-            <p className='font-bold text-lg'>Pedidos atrasados:</p>
+            <p className='font-bold text-lg text-blue-700' >Hoje: {format(startOfToday(), 'dd-MM-yyyy')}</p>
+            <p className='font-bold text-lg '>Pedidos atrasados:</p>
             <div className='px-1 overflow-y-scroll'>
               <Timeline>
                 {delayedOrders.map((o) => (
                   <Timeline.Item>
                     <Timeline.Point />
                     <Timeline.Content>
-                      <Timeline.Time>{format(o.deliveryDate, "dd-MM-yy", { locale: ptBR })}</Timeline.Time>
+                      <Timeline.Time className='text-red-500 font-semibold'>{format(o.deliveryDate, "dd-MM-yy", { locale: ptBR })}</Timeline.Time>
                       <Timeline.Title>
                         <Link to={`/orders/${o.id}`}
                           className='hover:text-cyan-600 hover:underline'
@@ -69,8 +72,13 @@ const Home: React.FC = () => {
 
                       </Timeline.Title>
                       <Timeline.Body>
-                        <p>Cliente: {o.Client.name}</p>
-                        <p>Serviço: {o.Service.description}</p>
+                        <p>{o.Client.name}</p>
+                        <Progress progress={100 * o.countTaskFinished / o.countTask}
+                        className='w-[150px]'
+                          progressLabelPosition="outside"
+                          labelProgress
+                          size="sm"
+                        />
                       </Timeline.Body>
                     </Timeline.Content>
                   </Timeline.Item>
