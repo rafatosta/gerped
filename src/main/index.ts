@@ -6,6 +6,7 @@ import { Seed } from './sequelize/seed/seed'
 import ClientDAO from './sequelize/dao/ClientDAO'
 import ServiceDAO from './sequelize/dao/ServiceDAO'
 import OrderDAO from './sequelize/dao/OrderDAO'
+import TaskDAO from './sequelize/dao/TaskDAO'
 
 function createWindow(): void {
   // Create the browser window.
@@ -118,6 +119,11 @@ app.whenReady().then(() => {
 
   ipcMain.handle('order:delete', async (_, id) => {
     return OrderDAO.delete(id)
+  })
+
+  /* Tasks */
+  ipcMain.handle('task:getTasksByOrderDeliveryDate', async (_) => {
+    return TaskDAO.getTasksByOrderDeliveryDate()
   })
 
   createWindow()

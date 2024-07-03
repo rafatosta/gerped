@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import { format, startOfToday } from 'date-fns';
 import { ptBR } from "date-fns/locale";
 import { classNames } from '@renderer/utils/classNames';
+import TaskIPC from '@renderer/ipc/TaskIPC';
 
 const Home: React.FC = () => {
 
@@ -19,6 +20,11 @@ const Home: React.FC = () => {
 
   const [delayedOrders, setDelayedOrders] = useState<Order[]>([]);
 
+  const fetchTasks = async () =>{
+    const res = await TaskIPC.findAll()
+    console.log(res);
+    
+  }
 
   const fetchData = async () => {
     try {
@@ -40,6 +46,7 @@ const Home: React.FC = () => {
 
   useEffect(() => {
     fetchData();
+    fetchTasks()
   }, []);
 
 
