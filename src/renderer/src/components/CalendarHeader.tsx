@@ -78,13 +78,13 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({ currentDate, onDateChan
   return (
     <div className="grid grid-cols-3 justify-between items-center gap-4">
       <button onClick={goToFirstOrder} className="font-medium text-gray-600 hover:text-gray-900 flex items-center gap-2">
-        <LuCalendarClock />
-        Próximo pedido
+        <LuCalendarClock className='min-h-6 min-w-6' />
+        <span className='hidden lg:flex'>Próximo pedido</span>
       </button>
 
       <Link to={'/orders/create'}
-        className="font-medium text-gray-600 hover:text-gray-900 flex items-center gap-2 justify-center">
-        <LuCalendarPlus />
+        className="invisible lg:visible flex font-medium text-gray-600 hover:text-gray-900  items-center gap-2 justify-center">
+        <LuCalendarPlus className='min-h-6 min-w-6' />
         Criar pedido
       </Link>
 
@@ -116,7 +116,7 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({ currentDate, onDateChan
             ))}
           </Dropdown>
         </div>
-        <div className="border rounded-lg px-1 pt-1">
+        <div className="flex border rounded-lg px-1 pt-1">
           {/* Previous Month Button */}
           <button
             type="button"
@@ -138,7 +138,6 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({ currentDate, onDateChan
             )}
             onClick={handleNextMonth}
             disabled={isNextDisabled}
-
           >
             <MdNavigateNext className="h-6 w-6 text-gray-500 inline-flex leading-none" />
           </button>
