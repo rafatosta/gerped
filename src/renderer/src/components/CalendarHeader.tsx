@@ -12,6 +12,7 @@ interface CalendarHeaderProps {
   startYear: number;
   endYear: number;
   goToFirstOrder: () => void;
+  scrollRef: React.RefObject<HTMLDivElement>
 }
 
 export const months = [
@@ -19,7 +20,7 @@ export const months = [
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
 ];
 
-const CalendarHeader: React.FC<CalendarHeaderProps> = ({ currentDate, onDateChange, startYear, endYear, goToFirstOrder }) => {
+const CalendarHeader: React.FC<CalendarHeaderProps> = ({ currentDate, onDateChange, startYear, endYear, goToFirstOrder, scrollRef }) => {
 
   const handlePrevMonth = () => {
     const newDate = subMonths(currentDate, 1);
@@ -60,10 +61,16 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({ currentDate, onDateChan
 
 
   useEffect(() => {
-    window.addEventListener('wheel', handleScroll);
+    const node = scrollRef.current;
+
+    if (node) {
+      node.addEventListener('wheel', handleScroll);
+    }
 
     return () => {
-      window.removeEventListener('wheel', handleScroll);
+      if (node) {
+        node.removeEventListener('wheel', handleScroll);
+      }
     };
   }, [currentDate]);
 

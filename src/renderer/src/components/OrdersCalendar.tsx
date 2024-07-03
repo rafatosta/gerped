@@ -4,7 +4,7 @@ import { startOfMonth, endOfMonth, format, isSameDay, startOfWeek, endOfWeek, ad
 import Order from '@backend/models/Order';
 import { ptBR } from "date-fns/locale";
 import CalendarHeader from './CalendarHeader';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { classNames } from '@renderer/utils/classNames';
 
 interface CalendarProps {
@@ -26,6 +26,10 @@ const getEventClass = (deliveryDate: Date, firstOrderDate: Date): string => {
 };
 
 function Calendar({ orders }: CalendarProps) {
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+
   const [currentDate, setCurrentDate] = useState<Date>(new Date);
   const [firstOrderDate, setFirstOrderDate] = useState<Date | null>(null);
   const [startYear, setStartYear] = useState<number>(new Date().getFullYear());
@@ -123,18 +127,24 @@ function Calendar({ orders }: CalendarProps) {
 
 
   return (
-    <div className='flex flex-col h-full'>
+    <div
+
+      className='flex flex-col h-full'
+    >
       <CalendarHeader
         currentDate={currentDate}
         onDateChange={setCurrentDate}
         startYear={startYear}
         endYear={endYear}
         goToFirstOrder={goToFirstOrder}
+        scrollRef={scrollRef}
       />
       <div className="grid grid-cols-7">
         {renderWeekDays()}
       </div>
-      <div className="flex-1 grid grid-cols-7 border-l border-t">
+      <div
+        ref={scrollRef}
+        className="flex-1 grid grid-cols-7 border-l border-t">
         {renderDays()}
       </div>
     </div>
