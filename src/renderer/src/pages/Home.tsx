@@ -6,6 +6,7 @@ import Calendar from "@renderer/components/Calendar";
 import Order from '@backend/models/Order';
 import OrderIPC from '@renderer/ipc/OrderIPC';
 import Title from '@renderer/components/Title';
+import MontherCalendar from '@renderer/components/MontherCalendar';
 
 const Home: React.FC = () => {
   const [currentDate, setCurrentDate] = useState<Date>(new Date);
@@ -66,27 +67,31 @@ const Home: React.FC = () => {
   }, [orders]);
 
   return (
-    <Container >
-      {/* <div className="flex justify-between items-center gap-4">
-        <Title disabled>Seus Pedidos</Title>
-        <p className="text-gray-500 text-lg">{count} pedidos</p>
-      </div> */}
-      <div className='grid grid-cols-3 h-full gap-x-4'>
-        <div>
+    <Container>
+      <div className="flex flex-row gap-x-4 overflow-auto h-full">
+        <div className="flex flex-col h-full gap-4">
           <CalendarHeader
             currentDate={currentDate}
             onDateChange={setCurrentDate}
             startYear={startYear}
             endYear={endYear}
           />
+          <MontherCalendar
+            currentDate={currentDate}
+            firstOrderDate={firstOrderDate}
+            orders={orders}
+          />
         </div>
-        <div className='col-span-2'>
-          <Calendar currentDate={currentDate} firstOrderDate={firstOrderDate} orders={orders} goToFirstOrder={goToFirstOrder} />
+        <div className="w-full h-full">
+          <Calendar
+            currentDate={currentDate}
+            firstOrderDate={firstOrderDate}
+            orders={orders}
+            goToFirstOrder={goToFirstOrder}
+          />
         </div>
-
       </div>
-
-    </Container>
+    </Container >
   );
 }
 
