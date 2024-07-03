@@ -1,16 +1,13 @@
 
 import { startOfMonth, endOfMonth, format, isSameDay, startOfWeek, endOfWeek, addDays, differenceInDays, getMonth } from 'date-fns';
-import { LuCalendarClock, LuCalendarPlus } from "react-icons/lu";
+
 import Order from '@backend/models/Order';
 import { ptBR } from "date-fns/locale";
-import { Link } from 'react-router-dom';
-import { months } from './CalendarHeader';
+import CalendarHeader, { months } from './CalendarHeader';
+import { useEffect, useState } from 'react';
 
 interface CalendarProps {
-  currentDate: Date;
-  firstOrderDate: Date | null;
   orders: Order[];
-  goToFirstOrder: () => void;
 }
 
 function classNames(...classes: string[] | any) {
@@ -31,10 +28,14 @@ const getEventClass = (deliveryDate: Date, firstOrderDate: Date): string => {
   }
 };
 
-function Calendar({ currentDate, firstOrderDate, orders, goToFirstOrder }: CalendarProps) {
+function Calendar({ orders }: CalendarProps) {
+  const [currentDate, setCurrentDate] = useState<Date>(new Date);
+  const [firstOrderDate, setFirstOrderDate] = useState<Date | null>(null);
+  const [startYear, setStartYear] = useState<number>(new Date().getFullYear());
+  const [endYear, setEndYear] = useState<number>(new Date().getFullYear());
+
   const start = startOfMonth(currentDate);
   const end = endOfMonth(currentDate);
-  //const days = eachDayOfInterval({ start, end });
 
   const startDay = startOfWeek(start);
   const endDay = endOfWeek(end);
@@ -43,7 +44,11 @@ function Calendar({ currentDate, firstOrderDate, orders, goToFirstOrder }: Calen
     return orders.filter(order => isSameDay(new Date(order.deliveryDate), day));
   };
 
-
+  const goToFirstOrder = () => {
+    if (orders.length > 0) {
+      setCurrentDate(new Date(orders[0].deliveryDate));
+    }
+  };
 
   const renderDays = () => {
     const daysElements: JSX.Element[] = [];
@@ -57,12 +62,15 @@ function Calendar({ currentDate, firstOrderDate, orders, goToFirstOrder }: Calen
         <div
           key={day.toISOString()}
           className={
-            classNames(`p-2 border-r border-b flex flex-col`,
-              isFirstOrderDay ? 'bg-red-200' : '',
-              start.getMonth() != day.getMonth() ? "bg-gray-100" : ""
+            classNames(`p-1 border-r border-b flex flex-col`,
+              start.getMonth() != day.getMonth() ? "bg-gray-100 opacity-50 grayscale-[50%]" : ""
             )}
         >
-          <div className="text-xs text-gray-800 font-semibold text-left">
+          <div className={classNames("text-xs p-1 font-semibold text-left",
+            isFirstOrderDay ? 'bg-blue-500 text-gray-100 rounded-full w-fit' : 'text-gray-800',
+          )}
+
+          >
             {format(day, 'd')}
             {format(day, 'd') == '1' && <span> {format(day, 'MMM', { locale: ptBR })}</span>}
           </div>
@@ -70,7 +78,7 @@ function Calendar({ currentDate, firstOrderDate, orders, goToFirstOrder }: Calen
             {getOrdersForDay(day).map(order => (
               <li key={order.id}
                 className={
-                  classNames("px-2 py-1 text-nowrap md:text-sm sm:text-xs rounded-lg mt-1 overflow-hidden border",
+                  classNames("px-2 py-1 text-nowrap md:text-sm rounded-lg mt-1 overflow-hidden border truncate",
                     eventClass
                   )}
               >
@@ -97,22 +105,35 @@ function Calendar({ currentDate, firstOrderDate, orders, goToFirstOrder }: Calen
     return weekDaysElements;
   };
 
+
+  useEffect(() => {
+
+    const deliveryDates = orders.map(order => new Date(order.deliveryDate));
+    const minYear = Math.min(...deliveryDates.map(date => date.getFullYear()));
+    const maxYear = Math.max(...deliveryDates.map(date => date.getFullYear()));
+
+    setStartYear(minYear);
+    setEndYear(maxYear);
+
+    if (orders.length > 0) {
+      const firstOrder = new Date(orders[0].deliveryDate);
+      setCurrentDate(firstOrder);
+      setFirstOrderDate(firstOrder);
+    } else {
+      setCurrentDate(new Date());
+    }
+  }, [orders]);
+
+
   return (
     <div className='flex flex-col h-full'>
-      <div className='flex justify-between items-center'>
-        <button onClick={goToFirstOrder} className="font-medium text-gray-600 hover:text-gray-900 flex items-center gap-2">
-          <LuCalendarClock />
-          Próximo pedido
-        </button>
-        <Link to={'/orders/create'} className="font-medium text-gray-600 hover:text-gray-900 flex items-center gap-2">
-          <LuCalendarPlus />
-          Novo
-        </Link>
-      </div>
-      <div className='flex justify-between items-center'>
-        <p className='font-bold text-blue-600 text-xl'>{months[getMonth(currentDate)]}</p>
-        <p className='font-bold text-gray-600 text-xl'>{format(currentDate, 'yyyy')}</p>
-      </div>
+      <CalendarHeader
+        currentDate={currentDate}
+        onDateChange={setCurrentDate}
+        startYear={startYear}
+        endYear={endYear}
+        goToFirstOrder={goToFirstOrder}
+      />
       <div className="grid grid-cols-7">
         {renderWeekDays()}
       </div>
