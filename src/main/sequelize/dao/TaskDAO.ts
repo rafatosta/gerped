@@ -37,7 +37,7 @@ class TaskDAO {
                 nest: true
             });
 
-            return tasks;
+            return tasks as Task[];
         } catch (error) {
             console.error('Error fetching tasks:', error);
             throw error; // Re-throw for handling at a higher level

@@ -1,6 +1,7 @@
 import { TaskStatus } from "@backend/enums/TaskStatus";
 import { Model, DataTypes, Optional } from 'sequelize';
 import sequelize from "@backend/db";
+import Order from "./Order";
 
 
 export interface TaskAttributes {
@@ -9,6 +10,8 @@ export interface TaskAttributes {
     status: TaskStatus;
     description: string;
     conclusionDate?: Date;
+    Order?: Order
+
 }
 
 interface TaskCreationAttributes extends Optional<TaskAttributes, 'id'> { }
@@ -19,6 +22,7 @@ class Task extends Model<TaskAttributes, TaskCreationAttributes> implements Task
     public status!: TaskStatus;
     public description!: string;
     public conclusionDate!: Date;
+    public Order!: Order
 
     public readonly createdAt!: Date;
     public readonly updatedAt!: Date;
