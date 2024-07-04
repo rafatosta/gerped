@@ -20,7 +20,7 @@ class TaskDAO {
                     },
                     include: [{
                         model: Client,
-                        attributes: ['name']
+                        attributes: ['id','name']
                     }, {
                         model: Service,
                         attributes: ['description']

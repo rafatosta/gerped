@@ -1,6 +1,7 @@
 import Task from "@backend/models/Task";
 import { FaCheck } from "react-icons/fa";
 import Title from "./Title";
+import { Link } from "react-router-dom";
 
 interface TasksListProps {
     tasks: Task[]
@@ -21,12 +22,20 @@ function TasksList({ tasks }: TasksListProps) {
                     {tasks.map((task) => (
                         <li className="col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow shadow-gray-400">
                             <div className="flex w-full items-center justify-between p-4">
-                                <div className="flex-1 truncate">
-                                    <div className="flex items-center space-x-3">
-                                        <h3 className="truncate font-semibold text-gray-800">{task.description}</h3>
-                                    </div>
-                                    <p className="mt-1 truncate text-sm text-gray-500">Tema: {task.Order.theme}</p>
-                                    <p className="mt-1 truncate text-sm text-gray-500">Cliente: {task.Order.Client.name}</p>
+                                <div className="flex flex-col truncate">
+
+                                    <h3 className="truncate font-semibold text-gray-800">{task.description}</h3>
+
+                                    <Link
+                                        to={`/orders/${task.Order.id}`}
+                                        className="mt-1 truncate text-sm text-gray-500 hover:text-cyan-600 hover:underline">
+                                        {task.Order.theme}
+                                    </Link>
+                                    <Link
+                                        to={`/clients/${task.Order.Client.id}`}
+                                        className="mt-1 truncate text-sm text-gray-500 hover:text-cyan-600 hover:underline">
+                                        {task.Order.Client.name}
+                                    </Link>
                                 </div>
                             </div>
                             <div>
