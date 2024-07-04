@@ -2,24 +2,13 @@ import Task from "@backend/models/Task";
 import { FaCheck } from "react-icons/fa";
 import Title from "./Title";
 import { Link } from "react-router-dom";
-import TaskIPC from "@renderer/ipc/TaskIPC";
-import { TaskStatus } from "@backend/enums/TaskStatus";
 
 interface TasksListProps {
     tasks: Task[]
-    fetchTasks: any
+    updateTask: any
 }
 
-function TasksList({ tasks, fetchTasks }: TasksListProps) {
-
-    const handleTaskStatusChange = (task: Task) => {
-        // Atualiza os valores
-        const updatedTask = { ...task, status: TaskStatus.FINALIZADO, conclusionDate: new Date() } as Task;
-        // Atualiza no banco
-        TaskIPC.update(updatedTask)
-        // Remove a tarefa da lista de tasks
-        fetchTasks()
-    }
+function TasksList({ tasks, updateTask }: TasksListProps) {
 
     return (
         <div className='flex flex-col overflow-auto'>
@@ -48,7 +37,7 @@ function TasksList({ tasks, fetchTasks }: TasksListProps) {
                             <div>
                                 <div className="-mt-px flex divide-x divide-gray-200">
                                     <div className="flex w-0 flex-1">
-                                        <button onClick={() => handleTaskStatusChange(task)}
+                                        <button onClick={() => updateTask(task)}
                                             className="relative -mr-px inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-bl-lg border border-transparent py-3 text-sm font-semibold text-gray-900">
                                             <FaCheck className='text-gray-400' />
                                             Concluir
