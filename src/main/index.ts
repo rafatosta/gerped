@@ -126,6 +126,10 @@ app.whenReady().then(() => {
     return TaskDAO.getTasksByOrderDeliveryDate()
   })
 
+  ipcMain.handle('task:update', async (_, data) => {
+    return TaskDAO.update(data)
+  })
+
   createWindow()
 
   app.on('activate', function () {

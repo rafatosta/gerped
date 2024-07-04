@@ -2,16 +2,23 @@ import Task from "@backend/models/Task";
 import { FaCheck } from "react-icons/fa";
 import Title from "./Title";
 import { Link } from "react-router-dom";
+import TaskIPC from "@renderer/ipc/TaskIPC";
+import { TaskStatus } from "@backend/enums/TaskStatus";
 
 interface TasksListProps {
     tasks: Task[]
+    fetchTasks: any
 }
 
-function TasksList({ tasks }: TasksListProps) {
+function TasksList({ tasks, fetchTasks }: TasksListProps) {
 
     const handleTaskStatusChange = (task: Task) => {
-        console.log('Concluir task: ', task.id);
-
+        // Atualiza os valores
+        const updatedTask = { ...task, status: TaskStatus.FINALIZADO, conclusionDate: new Date() } as Task;
+        // Atualiza no banco
+        TaskIPC.update(updatedTask)
+        // Remove a tarefa da lista de tasks
+        fetchTasks()
     }
 
     return (

@@ -11,7 +11,6 @@ import TasksList from '@renderer/components/TasksList';
 
 const Home: React.FC = () => {
 
-
   const [orders, setOrders] = useState<Order[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
 
@@ -37,13 +36,17 @@ const Home: React.FC = () => {
 
   return (
     <Container>
-      <div className={classNames("grid sm:grid-cols-3 h-full gap-6 ")}>
+      <div className={classNames("grid h-full gap-6 ",
+        tasks.length > 0 ? " grid-cols-3" : ""
+      )}>
         <div className="col-span-2">
           <OrdersCalendar orders={orders} />
         </div>
-        <div className="col-span-1 overflow-auto">
-          < TasksList tasks={tasks} />
-        </div>
+        {tasks.length > 0 &&
+          <div className="col-span-1 overflow-auto">
+            < TasksList tasks={tasks} fetchTasks={fetchData} />
+          </div>
+        }
       </div>
     </Container >
   );

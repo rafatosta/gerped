@@ -12,6 +12,14 @@ class TaskIPC {
     }
   }
 
+  static async update(data: Task): Promise<Task> {
+    try {
+      return await window.electron.ipcRenderer.invoke('task:update', data);
+    } catch (err) {
+      throw parseError(err);
+    }
+  }
+
 }
 
 export default TaskIPC;
