@@ -14,8 +14,13 @@ interface CalendarProps {
 const getEventClass = (deliveryDate: Date, firstOrderDate: Date): string => {
   const diffDays = differenceInDays(deliveryDate, firstOrderDate);
 
+  // Marcar pedidos atrasados
+  if (differenceInDays(startOfToday(), deliveryDate) > 0) {
+    return "border-red-200 text-gray-100 font-semibold bg-red-600";
+  }
+
   if (diffDays <= 7) {
-    return "border-red-200 text-red-800 bg-red-100";
+    return "border-purple-200 text-purple-800 bg-purple-100";
   } else if (diffDays <= 14) {
     return "border-yellow-200 text-yellow-800 bg-yellow-100";
   } else if (diffDays <= 30) {
@@ -64,27 +69,35 @@ function Calendar({ orders }: CalendarProps) {
           key={day.toISOString()}
           className={
             classNames(`p-1 border-r border-b flex flex-col`,
-              start.getMonth() != day.getMonth() ? "bg-gray-100 opacity-50 grayscale-[50%]" : ""
+              start.getMonth() != day.getMonth() ? "bg-gray-100 opacity-50 grayscale-[50%]" : "",
+              isFirstOrderDay ? 'border bg-red-50 border-red-500' : '',
+              startOfToday().toString() == day.toString() ? 'border border-blue-500 bg-blue-50' : '',
             )}
         >
-          <div className={classNames("text-xs p-1 font-semibold text-left",
-            isFirstOrderDay ? 'bg-red-500 px-2 text-gray-100 rounded-full w-fit' : '',
-            startOfToday().toString() == day.toString() ? 'bg-blue-500 px-2 text-gray-100 rounded-full w-fit' : '',
-          )}
-
-          >
-            {format(day, 'd')}
-            {format(day, 'd') == '1' && <span> {format(day, 'MMM', { locale: ptBR })}</span>}
+          <div className='flex justify-between items-center'>
+            <div className={classNames("text-xs p-1 font-semibold text-left",
+            )}
+            >
+              {format(day, 'd')}
+              {format(day, 'd') == '1' && <span> {format(day, 'MMM', { locale: ptBR })}</span>}
+            </div>
+            {startOfToday().toString() == day.toString() ?
+              <p className='text-gray-600 text-sm font-semibold'>Hoje</p> : ""}
           </div>
-          <ul className="mt-2 space-y-1 overflow-auto">
+
+
+          <ul className=" space-y-1 overflow-auto">
             {getOrdersForDay(day).map(order => (
               <li key={order.id}
                 className={
-                  classNames("px-2 py-1 text-nowrap md:text-sm rounded-lg mt-1 overflow-hidden border truncate",
-                    eventClass
+                  classNames("p-1 text-nowrap md:text-sm rounded-lg mt-1 overflow-hidden border truncate",
+                    eventClass,
                   )}
               >
+
                 {order.Client?.name}
+
+
               </li>
             ))}
           </ul>
