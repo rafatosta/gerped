@@ -5,24 +5,25 @@ import Order from '@backend/models/Order';
 import OrderIPC from '@renderer/ipc/OrderIPC';
 import { classNames } from '@renderer/utils/classNames';
 import TaskIPC from '@renderer/ipc/TaskIPC';
+import Task from '@backend/models/Task';
+import TasksList from '@renderer/components/TasksList';
+
 
 const Home: React.FC = () => {
 
 
   const [orders, setOrders] = useState<Order[]>([]);
-  const [count, setCount] = useState<number>(0);
-
-  const fetchTasks = async () => {
-    const res = await TaskIPC.findAll()
-    console.log(res);
-
-  }
+  const [tasks, setTasks] = useState<Task[]>([]);
 
   const fetchData = async () => {
     try {
-      const res = await OrderIPC.findAllPeding();
-      setOrders(res.data);
-      setCount(res.count);
+      const ordersData = await OrderIPC.findAllPeding();
+      const tasksData = await TaskIPC.findAll()
+
+      console.log(tasksData);
+
+      setOrders(ordersData.data);
+      setTasks(tasksData)
 
     } catch (err: unknown) {
       console.log(err);
@@ -31,15 +32,17 @@ const Home: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-    fetchTasks()
   }, []);
 
 
   return (
     <Container>
-      <div className={classNames("grid  h-full gap-6")}>
-        <div className="col-span-3">
+      <div className={classNames("grid sm:grid-cols-3 h-full gap-6 ")}>
+        <div className="col-span-2">
           <OrdersCalendar orders={orders} />
+        </div>
+        <div className="col-span-1 overflow-auto">
+          < TasksList tasks={tasks} />
         </div>
       </div>
     </Container >
