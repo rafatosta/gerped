@@ -1,10 +1,12 @@
-import React, { useEffect } from 'react';
-import { addMonths, subMonths, setMonth, setYear, getYear, getMonth } from 'date-fns';
-import { Dropdown } from 'flowbite-react';
+import React, { useEffect, useState } from 'react';
+import { addMonths, subMonths, setMonth, setYear, getYear, getMonth, format, differenceInDays, startOfToday } from 'date-fns';
+import { ptBR } from "date-fns/locale";
+import { Drawer, Dropdown, Progress, Timeline } from 'flowbite-react';
 import { MdNavigateBefore, MdNavigateNext } from "react-icons/md";
-import { LuCalendarClock, LuCalendarPlus } from "react-icons/lu";
+import { LuCalendarClock, LuCalendarPlus, LuCalendarX } from "react-icons/lu";
 import { classNames } from '@renderer/utils/classNames';
 import { Link } from 'react-router-dom';
+import Order from '@backend/models/Order';
 
 interface CalendarHeaderProps {
   currentDate: Date;
@@ -12,7 +14,8 @@ interface CalendarHeaderProps {
   startYear: number;
   endYear: number;
   goToFirstOrder: () => void;
-  scrollRef: React.RefObject<HTMLDivElement>
+  scrollRef: React.RefObject<HTMLDivElement>;
+  delayedOrders: Order[]
 }
 
 export const months = [
@@ -20,7 +23,10 @@ export const months = [
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
 ];
 
-const CalendarHeader: React.FC<CalendarHeaderProps> = ({ currentDate, onDateChange, startYear, endYear, goToFirstOrder, scrollRef }) => {
+const CalendarHeader: React.FC<CalendarHeaderProps> = ({ currentDate, onDateChange, startYear, endYear, goToFirstOrder, scrollRef, delayedOrders }) => {
+
+  const [isOpen, setIsOpen] = useState(false);
+  const handleClose = () => setIsOpen(false);
 
   const handlePrevMonth = () => {
     const newDate = subMonths(currentDate, 1);
@@ -75,8 +81,45 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({ currentDate, onDateChan
   }, [currentDate]);
 
 
+  const DrawerOrder = () => {
+    return (
+      <Drawer open={isOpen} onClose={handleClose} position="right" className='w-fit overflow-hidden select-none'>
+        <Drawer.Header titleIcon={LuCalendarX} title={`Pedidos atrasados (${delayedOrders.length})`} />
+        <Drawer.Items className="h-full overflow-y-auto px-6">
+          <Timeline>
+            {delayedOrders.map((o) => (
+              <Timeline.Item key={o.id}>
+                <Timeline.Point />
+                <Timeline.Content>
+                  <Timeline.Time className="text-red-500 font-semibold flex justify-between">
+                    <p>{format(o.deliveryDate, 'dd-MM-yy', { locale: ptBR })}</p>
+                    <p>{differenceInDays(startOfToday(), o.deliveryDate)} {differenceInDays(startOfToday(), o.deliveryDate) > 1 ? "dias" : "dia"}</p>
+                  </Timeline.Time>
+                  <Timeline.Title>
+                    <Link to={`/orders/${o.id}`} className="hover:text-cyan-600 hover:underline">
+                      {o.theme}
+                    </Link>
+                  </Timeline.Title>
+                  <Timeline.Body className='flex justify-between items-center'>
+                    <p>{o.Client.name}</p>
+                    <p>{(100 * o.countTaskFinished) / o.countTask} %</p>
+                  </Timeline.Body>
+                </Timeline.Content>
+              </Timeline.Item>
+            ))}
+          </Timeline>
+        </Drawer.Items>
+      </Drawer>
+    )
+  };
+
   return (
-    <div className="grid grid-cols-3 justify-between items-center gap-4">
+    <div className="grid grid-cols-4 justify-between items-center gap-4">
+      {delayedOrders.length > 0 && <button onClick={() => setIsOpen(true)} className="text-red-600 font-bold hover:text-gray-900 flex items-center gap-2">
+        <LuCalendarX className='min-h-6 min-w-6' />
+        <span className='hidden lg:flex'>{`Pedidos atrasados (${delayedOrders.length})`}</span>
+      </button>}
+
       <button onClick={goToFirstOrder} className="font-medium text-gray-600 hover:text-gray-900 flex items-center gap-2">
         <LuCalendarClock className='min-h-6 min-w-6' />
         <span className='hidden lg:flex'>Próximo pedido</span>
@@ -144,10 +187,10 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({ currentDate, onDateChan
         </div>
       </div>
 
-
-
+      {/* Drawer dos Pedidos atrasados */}
+      <DrawerOrder />
     </div>
   );
-};
+}
 
 export default CalendarHeader;

@@ -11,16 +11,15 @@ interface CalendarProps {
   orders: Order[];
 }
 
-const getEventClass = (deliveryDate: Date, firstOrderDate: Date): string => {
-  const diffDays = differenceInDays(deliveryDate, firstOrderDate);
-
+const getEventClass = (deliveryDate: Date): string => {
   // Marcar pedidos atrasados
-  if (differenceInDays(startOfToday(), deliveryDate) > 0) {
+  if (differenceInDays(startOfToday(), deliveryDate) > 1) {
     return "border-red-200 text-gray-100 font-semibold bg-red-600";
   }
 
+  const diffDays = differenceInDays(deliveryDate, startOfToday());
   if (diffDays <= 7) {
-    return "border-purple-200 text-purple-800 bg-purple-100";
+    return "border-red-200 text-red-800 bg-red-100";
   } else if (diffDays <= 14) {
     return "border-yellow-200 text-yellow-800 bg-yellow-100";
   } else if (diffDays <= 30) {
@@ -33,6 +32,8 @@ const getEventClass = (deliveryDate: Date, firstOrderDate: Date): string => {
 function Calendar({ orders }: CalendarProps) {
 
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const [delayedOrders, setDelayedOrders] = useState<Order[]>([]);
 
 
   const [currentDate, setCurrentDate] = useState<Date>(new Date);
@@ -62,7 +63,7 @@ function Calendar({ orders }: CalendarProps) {
     while (day <= endDay) {
       const isFirstOrderDay = firstOrderDate && isSameDay(day, firstOrderDate);
       const dayOrders = getOrdersForDay(day);
-      const eventClass = dayOrders.length > 0 && firstOrderDate ? getEventClass(dayOrders[0].deliveryDate, firstOrderDate) : '';
+      const eventClass = dayOrders.length > 0 && firstOrderDate ? getEventClass(dayOrders[0].deliveryDate) : '';
 
       daysElements.push(
         <div
@@ -94,10 +95,7 @@ function Calendar({ orders }: CalendarProps) {
                     eventClass,
                   )}
               >
-
                 {order.Client?.name}
-
-
               </li>
             ))}
           </ul>
@@ -137,6 +135,9 @@ function Calendar({ orders }: CalendarProps) {
     } else {
       setCurrentDate(new Date());
     }
+
+    const filtered = orders.filter(order => differenceInDays(startOfToday(), order.deliveryDate) > 1);
+    setDelayedOrders(filtered);
   }, [orders]);
 
 
@@ -152,6 +153,7 @@ function Calendar({ orders }: CalendarProps) {
         endYear={endYear}
         goToFirstOrder={goToFirstOrder}
         scrollRef={scrollRef}
+        delayedOrders={delayedOrders}
       />
       <div className="grid grid-cols-7">
         {renderWeekDays()}
