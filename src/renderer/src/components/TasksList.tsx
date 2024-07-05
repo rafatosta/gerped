@@ -16,7 +16,7 @@ function TasksList({ tasks, updateTask }: TasksListProps) {
             <div className='overflow-auto'>
                 <ul role="list" className="grid grid-cols-1 gap-4 m-2">
                     {tasks.map((task) => (
-                        <li className="col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow shadow-gray-400">
+                        <li key={task.id} className="col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow shadow-gray-400">
                             <div className="flex w-full items-center justify-between p-4">
                                 <div className="flex flex-col truncate">
 
