@@ -115,20 +115,22 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({ currentDate, onDateChan
 
   return (
     <div className="grid grid-cols-4 justify-between items-center gap-4">
-      {delayedOrders.length > 0 && <button onClick={() => setIsOpen(true)} className="text-red-600 font-bold hover:text-gray-900 flex items-center gap-2">
+      {delayedOrders.length > 0 && <button title={`Pedidos atrasados (${delayedOrders.length})`} onClick={() => setIsOpen(true)} className="text-red-600 font-bold hover:text-gray-900 flex items-center gap-2">
         <LuCalendarX className='min-h-6 min-w-6' />
-        <span className='hidden lg:flex'>{`Pedidos atrasados (${delayedOrders.length})`}</span>
+        <span className='hidden xl:flex'>{`Atrasados (${delayedOrders.length})`}</span>
       </button>}
 
-      <button onClick={goToFirstOrder} className="font-medium text-gray-600 hover:text-gray-900 flex items-center gap-2">
+      <button title="Próximo pedido" onClick={goToFirstOrder} className="invisible xl:visible font-medium text-gray-600 hover:text-gray-900 flex items-center gap-2">
         <LuCalendarClock className='min-h-6 min-w-6' />
-        <span className='hidden lg:flex'>Próximo pedido</span>
+        <span className='hidden xl:flex'>Próximo</span>
       </button>
 
       <Link to={'/orders/create'}
-        className="invisible lg:visible flex font-medium text-gray-600 hover:text-gray-900  items-center gap-2 justify-center">
+      title='Criar pedido'
+        className="invisible xl:visible flex font-medium text-gray-600 hover:text-gray-900  items-center gap-2 justify-center">
         <LuCalendarPlus className='min-h-6 min-w-6' />
-        Criar pedido
+        <span className='hidden xl:flex'>Criar</span>
+        
       </Link>
 
       <div className='flex gap-2 justify-end'>
