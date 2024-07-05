@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { addMonths, subMonths, setMonth, setYear, getYear, getMonth, format, differenceInDays, startOfToday } from 'date-fns';
 import { ptBR } from "date-fns/locale";
-import { Drawer, Dropdown, Progress, Timeline } from 'flowbite-react';
+import { Drawer, Dropdown, Progress, Timeline, Tooltip } from 'flowbite-react';
 import { MdNavigateBefore, MdNavigateNext } from "react-icons/md";
 import { LuCalendarClock, LuCalendarPlus, LuCalendarX } from "react-icons/lu";
 import { classNames } from '@renderer/utils/classNames';
@@ -113,25 +113,34 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({ currentDate, onDateChan
     )
   };
 
+  <Tooltip content="Tooltip content">
+
+  </Tooltip>
   return (
     <div className="grid grid-cols-4 justify-between items-center gap-4">
-      {delayedOrders.length > 0 && <button title={`Pedidos atrasados (${delayedOrders.length})`} onClick={() => setIsOpen(true)} className="text-red-600 font-bold hover:text-gray-900 flex items-center gap-2">
-        <LuCalendarX className='min-h-6 min-w-6' />
-        <span className='hidden xl:flex'>{`Atrasados (${delayedOrders.length})`}</span>
-      </button>}
+      {delayedOrders.length > 0 && <Tooltip content={`Pedidos atrasados (${delayedOrders.length})`}>
+        <button onClick={() => setIsOpen(true)} className="text-red-600 font-bold hover:text-gray-900 flex items-center gap-2">
+          <LuCalendarX className='min-h-6 min-w-6' />
+          <span className='hidden xl:flex'>{`Atrasados (${delayedOrders.length})`}</span>
+        </button>
+      </Tooltip>
 
-      <button title="Próximo pedido" onClick={goToFirstOrder} className="invisible xl:visible font-medium text-gray-600 hover:text-gray-900 flex items-center gap-2">
-        <LuCalendarClock className='min-h-6 min-w-6' />
-        <span className='hidden xl:flex'>Próximo</span>
-      </button>
 
-      <Link to={'/orders/create'}
-      title='Criar pedido'
-        className="invisible xl:visible flex font-medium text-gray-600 hover:text-gray-900  items-center gap-2 justify-center">
-        <LuCalendarPlus className='min-h-6 min-w-6' />
-        <span className='hidden xl:flex'>Criar</span>
-        
-      </Link>
+      }
+      <Tooltip content="Próximo pedido">
+        <button onClick={goToFirstOrder} className="invisible xl:visible font-medium text-gray-600 hover:text-gray-900 flex items-center gap-2">
+          <LuCalendarClock className='min-h-6 min-w-6' />
+          <span className='hidden xl:flex'>Próximo</span>
+        </button>
+      </Tooltip>
+
+      <Tooltip content="Criar pedido">
+        <Link to={'/orders/create'}
+          className="invisible xl:visible flex font-medium text-gray-600 hover:text-gray-900  items-center gap-2 justify-center">
+          <LuCalendarPlus className='min-h-6 min-w-6' />
+          <span className='hidden xl:flex'>Criar</span>
+        </Link>
+      </Tooltip>
 
       <div className='flex gap-2 justify-end'>
         <div className="flex items-center space-x-2">
