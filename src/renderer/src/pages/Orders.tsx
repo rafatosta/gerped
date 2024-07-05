@@ -27,7 +27,7 @@ function Orders() {
         {
             queryKey: ['orders', searchText, currentPage, filterStatus],
             queryFn: async () => {
-                return await await OrderIPC.findAll(searchText, currentPage, filterStatus);
+                return await OrderIPC.findAll(searchText, currentPage, filterStatus);
             },
         }
     );
