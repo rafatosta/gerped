@@ -8,57 +8,39 @@ import PaginationControls from "@renderer/components/PaginationControls";
 import Title from "@renderer/components/Title";
 import OrderIPC from "@renderer/ipc/OrderIPC";
 import formatDate from "@renderer/utils/formatDate";
+import { useQuery } from "@tanstack/react-query";
 import { Badge, Button, Dropdown, FloatingLabel, Progress } from "flowbite-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 function Orders() {
-    // Estado para controlar a página atual dos pedidos
-    const [currentPage, setCurrentPage] = useState<number>(1);
 
-    // Estado para armazenar o texto de busca
-    const [searchText, setSearchText] = useState<string>('');
-
-    // Estado para controlar o status de filtro dos pedidos
-    const [filterStatus, setFilterStatus] = useState<OrderStatus>(OrderStatus.ATIVO);
-
-    // Hook do React Router para navegação entre páginas
     const navigate = useNavigate();
 
-    // Estado para armazenar os dados dos pedidos obtidos da API
-    const [data, setData] = useState<Order[]>([]);
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [searchText, setSearchText] = useState<string>('');
+    const [filterStatus, setFilterStatus] = useState<OrderStatus>(OrderStatus.ATIVO);
 
-    // Estado para armazenar o número total de registros de pedidos
-    const [count, setCount] = useState<number>(0);
-
-    // Estado para armazenar possíveis erros durante a busca de pedidos
     const [error, setError] = useState<IAppError | null>(null);
 
-    // Função assíncrona para buscar os pedidos com base nos filtros atuais
-    const fetchData = async () => {
-        try {
-            const res = await OrderIPC.findAll(searchText, currentPage, filterStatus);
-            setData(res.data);
-            setCount(res.count);
-            setError(null);
-        } catch (err: unknown) {
-            setError(err as IAppError);
+    const { data } = useQuery<{ data: Order[]; count: number }>(
+        {
+            queryKey: ['orders', searchText, currentPage, filterStatus],
+            queryFn: async () => {
+                return await await OrderIPC.findAll(searchText, currentPage, filterStatus);
+            },
         }
-    };
+    );
 
-    // Efeito colateral para buscar dados quando houver mudança nos filtros
-    useEffect(() => {
-        fetchData();
-    }, [searchText, currentPage, filterStatus]);
+    const orders = data?.data || [];
+    const count = data?.count || 0;
 
-    // Função para mudar a página atual de pedidos
     const onPageChange = (page: number) => setCurrentPage(page);
 
-    // Handler para atualizar o texto de busca de pedidos
     const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) =>
         setSearchText(event.target.value);
 
-    // Definição das colunas da tabela de pedidos
+
     const columns = [
         {
             header: 'Cliente',
@@ -146,7 +128,7 @@ function Orders() {
             </div>
 
             {/* Tabela de pedidos com dados e colunas definidas */}
-            <GenericTable data={data} columns={columns} keyExtractor={(data: Order) => data.id} />
+            <GenericTable data={orders} columns={columns} keyExtractor={(data: Order) => data.id} />
 
             {/* Controles de paginação para navegar entre páginas de pedidos */}
             <PaginationControls
