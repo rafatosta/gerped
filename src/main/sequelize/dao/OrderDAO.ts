@@ -27,7 +27,7 @@ class OrderDAO {
 
     // Configuração de busca por texto se houver um texto de busca especificado
     if (searchText) {
-      whereClause += ` AND (theme LIKE :searchText OR Client.name LIKE :searchText)`;
+      whereClause += ` AND (theme LIKE :searchText OR c.name LIKE :searchText)`;
       replacements.searchText = `%${searchText}%`;
     }
 
