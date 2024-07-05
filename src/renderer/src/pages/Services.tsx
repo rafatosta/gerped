@@ -7,37 +7,33 @@ import PaginationControls from "@renderer/components/PaginationControls";
 import ServiceFormModal from "@renderer/components/ServiceFromModal";
 import Title from "@renderer/components/Title";
 import ServiceIPC from "@renderer/ipc/ServiceIPC";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FloatingLabel, Button } from "flowbite-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 
 function Services() {
-    const [searchText, setSearchText] = useState<string>('');
-    const [currentPage, setCurrentPage] = useState<number>(1);
 
-    const [data, setData] = useState<Service[]>([]);
-    const [count, setCount] = useState<number>(0);
-
-    const [error, setError] = useState<IAppError | null>(null);
+    const queryClient = useQueryClient();
 
     const [selectedService, setSelectedService] = useState<Service | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [error, setError] = useState<IAppError | null>(null);
 
-    // Função para carregar os serviços do banco de dados
-    const fetchData = async () => {
-        try {
-            const res = await ServiceIPC.findAll(searchText, currentPage);
-            setData(res.data);
-            setCount(res.count);
-            setError(null);
-        } catch (err) {
-            setError(err as IAppError);
+    const [searchText, setSearchText] = useState<string>('');
+    const [currentPage, setCurrentPage] = useState<number>(1);
+
+    const { data } = useQuery<{ data: Service[]; count: number }>(
+        {
+            queryKey: ['services', searchText, currentPage],
+            queryFn: async () => {
+                return await ServiceIPC.findAll(searchText, currentPage);
+            },
         }
-    };
+    );
 
-    useEffect(() => {
-        fetchData();
-    }, [searchText, currentPage]);
+    const services = data?.data || [];
+    const count = data?.count || 0;
 
     // Função para mudar a página atual
     const onPageChange = (page: number) => {
@@ -45,42 +41,51 @@ function Services() {
     };
 
     // Função para atualizar o texto de busca e resetar para a primeira página
-    const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleSearchText = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSearchText(event.target.value);
         setCurrentPage(1); // Reset para a primeira página ao buscar
     };
 
+    // Função para deletar um serviço
+    const { mutateAsync: handleDelete } = useMutation(
+        {
+            mutationFn: async (service: Service) => await ServiceIPC.delete(service.id),
+            onSuccess: () => {
+                setIsModalOpen(false);
+                setSearchText("");
+                setCurrentPage(1);
+                queryClient.invalidateQueries({ queryKey: ['services'] });
+            },
+            onError: (err)=>{
+                setError(err as IAppError);
+            }
+        }
+    );
+
+    // Função para salvar um serviço
+    const { mutateAsync: handleSave } = useMutation(
+        {
+            mutationFn: async (service: Service) =>  await ServiceIPC.save(service),
+            onSuccess: () => {
+                setIsModalOpen(false);
+                setSearchText("");
+                setCurrentPage(1);
+                queryClient.invalidateQueries({ queryKey: ['services'] });
+            },
+            onError: (err)=>{
+                setError(err as IAppError);
+            }
+        }
+    );
+
     // Função para editar um serviço
-    const handleEdit = async (data: Service) => {
+    const openModalEdit = async (data: Service) => {
         setSelectedService(data);
         setIsModalOpen(true);
     };
 
-    // Função para deletar um serviço
-    const handleDelete = async (data: Service) => {
-        try {
-            await ServiceIPC.delete(data.id);
-            fetchData();
-        } catch (err) {
-            setError(err as IAppError);
-        }
-    };
-
-    // Função para salvar um serviço
-    const handleSave = async (service: Service) => {
-        try {
-            await ServiceIPC.save(service);
-            setIsModalOpen(false);
-            setSearchText("");
-            setCurrentPage(1);
-            fetchData();
-        } catch (err) {
-            setError(err as IAppError);
-        }
-    };
-
     // Função para fechar o modal de formulário
-    const onCloseModal = () => {
+    const closeModal = () => {
         setIsModalOpen(false);
         setSelectedService(null);
     };
@@ -97,7 +102,7 @@ function Services() {
             accessor: (data: Service) => (
                 <button
                     className="font-medium text-green-600 hover:underline"
-                    onClick={() => handleEdit(data)}
+                    onClick={() => openModalEdit(data)}
                 >
                     Editar
                 </button>
@@ -132,7 +137,7 @@ function Services() {
                         label="Buscar"
                         type="text"
                         value={searchText}
-                        onChange={handleSearch}
+                        onChange={handleSearchText}
                     />
                 </div>
 
@@ -140,7 +145,7 @@ function Services() {
                     <Button onClick={() => setIsModalOpen(true)}>Novo</Button>
                     <ServiceFormModal
                         isOpen={isModalOpen}
-                        onClose={onCloseModal}
+                        onClose={closeModal}
                         onSave={handleSave}
                         editMode={!!selectedService}
                         service={selectedService}
@@ -150,7 +155,7 @@ function Services() {
 
             {/* Tabela de serviços */}
             <GenericTable
-                data={data}
+                data={services}
                 columns={columns}
                 keyExtractor={(data: Service) => data.id}
             />
