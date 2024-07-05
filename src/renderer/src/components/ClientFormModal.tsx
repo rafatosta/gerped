@@ -3,16 +3,13 @@ import { Button, FloatingLabel, Modal } from 'flowbite-react'
 import { FormEvent, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import InputMask from 'react-input-mask'
-import ClientIPC from '@renderer/ipc/ClientIPC'
-import { IAppError } from '@backend/interface/IAppError'
 
 // Interface para as props do componente ClientFormModal
 interface IClienteFormDialog {
-  onSave: () => void; // Função a ser chamada ao salvar o cliente
-  setError: any; // Função para definir erros
+  onSave: (client: Client) => Promise<Client>; // Função a ser chamada ao salvar o cliente
 }
 
-function ClientFormModal({ onSave, setError }: IClienteFormDialog) {
+function ClientFormModal({ onSave }: IClienteFormDialog) {
   const [openModal, setOpenModal] = useState(false); // Estado para controlar a abertura do modal
   const nameInputRef = useRef<HTMLInputElement>(null); // Referência para o input de nome
 
@@ -44,18 +41,15 @@ function ClientFormModal({ onSave, setError }: IClienteFormDialog) {
     const buttonName = submitter.name;
 
     // Salva o cliente usando ClientIPC e lida com a resposta
-    ClientIPC.save(client)
-      .then((newClient) => {
-        if (buttonName === 'btnCreateOrder') {
-          navigate(`/orders/create/${newClient.id}`);
-        } else {
-          onSave();
-        }
-      }).catch((err: IAppError) => {
-        setError(err);
-      });
-
-    onCloseModal();
+    try {
+      const newClient = await onSave(client)
+      if (buttonName === 'btnCreateOrder') {
+        navigate(`/orders/create/${newClient.id}`);
+      }
+    } catch (e) {     
+    } finally {
+      onCloseModal();
+    }
   }
 
   // Função para fechar o modal e resetar o estado do cliente
