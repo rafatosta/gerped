@@ -14,6 +14,7 @@ import ClientIPC from "@renderer/ipc/ClientIPC";
 import OrderIPC from "@renderer/ipc/OrderIPC";
 import ServiceIPC from "@renderer/ipc/ServiceIPC";
 import formatDate from "@renderer/utils/formatDate";
+import { useQuery } from "@tanstack/react-query";
 import { Button, Checkbox, FloatingLabel, Label } from "flowbite-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -40,31 +41,29 @@ function OrderForm() {
     const [newTask, setNewTask] = useState<string>('');
     // Estado para armazenar erros
     const [error, setError] = useState<IAppError | null>(null);
-    // Estado para armazenar dados de clientes e serviços
-    const [dataClient, setDataClient] = useState<Client[]>([]);
-    const [dataService, setDataService] = useState<Service[]>([]);
 
-    // Função para buscar clientes
-    const fetchClients = async () => {
-        try {
-            const res = await ClientIPC.findAll();
-            setDataClient(res.data);
-            setError(null);
-        } catch (err: unknown) {
-            setError(err as IAppError);
+    const { data: clientsData } = useQuery<Client[]>(
+        {
+            queryKey: ['clientsAll'],
+            queryFn: async () => {
+                const data = await ClientIPC.findAll();
+                return data.data
+            },
         }
-    };
+    );
 
-    // Função para buscar serviços
-    const fetchServices = async () => {
-        try {
-            const res = await ServiceIPC.findAll();
-            setDataService(res.data);
-            setError(null);
-        } catch (err: unknown) {
-            setError(err as IAppError);
+    const { data: servicesData } = useQuery<Service[]>(
+        {
+            queryKey: ['servicesAll'],
+            queryFn: async () => {
+                const data = await ServiceIPC.findAll();
+                return data.data
+            },
         }
-    };
+    );
+
+    const dataClient = clientsData || []
+    const dataService = servicesData || []
 
     // Função assíncrona para buscar o pedido com base no parâmetro da página
     const fetchOrder = async (orderId: string) => {
@@ -87,9 +86,6 @@ function OrderForm() {
                 idClient: parseInt(clientId)
             } as Order));
         }
-
-        fetchClients();
-        fetchServices();
     }, [orderId, clientId]);
 
     // Função para lidar com mudanças nos inputs do formulário
