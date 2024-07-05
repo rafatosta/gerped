@@ -14,8 +14,9 @@ import { IAppError } from '@backend/interface/IAppError'
 import AlertError from '@renderer/components/AlertError'
 import ClientIPC from '@renderer/ipc/ClientIPC'
 import OrderIPC from '@renderer/ipc/OrderIPC'
+import { useQuery } from '@tanstack/react-query'
 
-function ClienteDetails() {
+function ClientDetails() {
   // Obtém o parâmetro de rota 'id'
   const { id } = useParams<{ id: string }>()
 
@@ -46,9 +47,20 @@ function ClienteDetails() {
     institute: ''
   } as Client)
 
+
+  const { data: dataOrders } = useQuery<{ data: Order[]; count: number }>(
+    {
+      queryKey: ['clientOrders', id, searchText, currentPage, filterStatus],
+      queryFn: async () => {
+        setError(null);
+        return await OrderIPC.findOrdersByClientId(id ? id : "", searchText, currentPage, filterStatus);
+      }
+    }
+  );
+
   // Estado para armazenar a lista de pedidos e total de registros
-  const [data, setData] = useState<Order[]>([])
-  const [count, setCount] = useState<number>(0)
+  const orders = dataOrders?.data || [];
+  const count = dataOrders?.count || 0;
 
   // Função para mudar a página atual dos pedidos
   const onPageChange = (page: number) => setCurrentPage(page)
@@ -56,19 +68,6 @@ function ClienteDetails() {
   // Função para atualizar o texto de busca na lista de pedidos
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => setSearchText(event.target.value)
 
-
-  // Função assíncrona para buscar os pedidos com base nos filtros atuais
-  const fetchOrders = async (id: string) => {
-
-    try {
-      const res = await OrderIPC.findOrdersByClientId(id, searchText, currentPage, filterStatus);
-      setData(res.data);
-      setCount(res.count);
-      setError(null);
-    } catch (err: unknown) {
-      setError(err as IAppError);
-    }
-  };
 
   // Efeito para carregar dados do cliente baseado no 'id' da rota
   useEffect(() => {
@@ -80,12 +79,6 @@ function ClienteDetails() {
     }
   }, [id])
 
-  // Efeito para atualizar a lista de pedidos baseado em mudanças de página, texto de busca ou status de filtro
-  useEffect(() => {
-    if (id) {
-      fetchOrders(id)
-    }
-  }, [currentPage, searchText, filterStatus])
 
   // Função para atualizar campos do formulário de cliente
   const handleInputChange = (field: keyof Client) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -275,7 +268,7 @@ function ClienteDetails() {
       </div>
 
       {/* Tabela de pedidos associados ao cliente */}
-      <GenericTable data={data} columns={columns} keyExtractor={(data: Order) => data.id} />
+      <GenericTable data={orders} columns={columns} keyExtractor={(data: Order) => data.id} />
 
       {/* Controles de paginação para navegar entre páginas de pedidos */}
       <PaginationControls
@@ -288,4 +281,4 @@ function ClienteDetails() {
   )
 }
 
-export default ClienteDetails
+export default ClientDetails
