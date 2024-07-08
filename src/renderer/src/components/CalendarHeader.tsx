@@ -11,7 +11,7 @@ import {
   startOfToday
 } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { Drawer, Dropdown, Progress, Timeline, Tooltip } from 'flowbite-react'
+import { Drawer, Dropdown, Timeline, Tooltip } from 'flowbite-react'
 import { MdNavigateBefore, MdNavigateNext } from 'react-icons/md'
 import { LuCalendarClock, LuCalendarPlus, LuCalendarX } from 'react-icons/lu'
 import { classNames } from '@renderer/utils/classNames'

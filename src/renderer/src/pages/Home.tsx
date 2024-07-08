@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import Container from '@renderer/components/Container'
 import OrdersCalendar from '@renderer/components/OrdersCalendar'
 import Order from '@backend/models/Order'
