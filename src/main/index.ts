@@ -5,7 +5,7 @@ import icon from '../../resources/icon.png?asset'
 import { Seed } from './sequelize/seed/seed'
 
 import './ipc'
-
+import sequelize from './sequelize/db'
 
 function createWindow(): void {
   // Create the browser window.
@@ -54,10 +54,12 @@ app.whenReady().then(() => {
   })
 
   if (process.env.NODE_ENV === 'production') {
-    console.log('production mode')
-    //createTable(false)
+    try {
+      sequelize.sync()
+    } catch (error) {
+      console.error('Erro ao sincronizar todas as tabelas:', error)
+    }
   } else if (process.env.NODE_ENV === 'development') {
-    // Sem o seed a tabela não é criada nem os modelos sincronizados
     Seed()
   }
 
