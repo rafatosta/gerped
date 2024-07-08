@@ -2,7 +2,7 @@ import { Table } from 'flowbite-react'
 
 interface Column<T> {
   header: string
-  accessor: (item: T, index:number) => React.ReactNode
+  accessor: (item: T, index: number) => React.ReactNode
   className?: string
 }
 

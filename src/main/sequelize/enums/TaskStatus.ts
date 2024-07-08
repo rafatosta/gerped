@@ -1,4 +1,4 @@
 export enum TaskStatus {
-    PENDENTE = 1,
-    FINALIZADO = 2
+  PENDENTE = 1,
+  FINALIZADO = 2
 }

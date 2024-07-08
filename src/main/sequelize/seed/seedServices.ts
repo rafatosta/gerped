@@ -1,5 +1,4 @@
-import Service, { ServiceAttributes } from "@backend/models/Service";
-
+import Service, { ServiceAttributes } from '@backend/models/Service'
 
 export const seedServices = async () => {
   try {
@@ -9,11 +8,11 @@ export const seedServices = async () => {
       { description: 'Consultoria' },
       { description: 'Orientação' },
       { description: 'Revisão' },
-      { description: 'Tradução' },
-    ];
+      { description: 'Tradução' }
+    ]
 
-    await Service.bulkCreate(data);
+    await Service.bulkCreate(data)
   } catch (error) {
-    console.error('Erro ao popular o banco de dados:', error);
+    console.error('Erro ao popular o banco de dados:', error)
   }
-};
+}

@@ -13,48 +13,41 @@ import { formatPhoneNumber } from '@renderer/utils/formatPhoneNumber'
 import { IAppError } from '@backend/interface/IAppError'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-
 function Clients() {
-
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
 
   const [currentPage, setCurrentPage] = useState<number>(1)
   const [searchText, setSearchText] = useState<string>('')
   const [errorApp, setErrorApp] = useState<IAppError | null>(null)
 
-  const { data, error } = useQuery<{ data: Client[]; count: number }>(
-    {
-      queryKey: ['clients', searchText, currentPage],
-      queryFn: async () => {
-        return await ClientIPC.findAll(searchText, currentPage);
-      },
+  const { data, error } = useQuery<{ data: Client[]; count: number }>({
+    queryKey: ['clients', searchText, currentPage],
+    queryFn: async () => {
+      return await ClientIPC.findAll(searchText, currentPage)
     }
-  );
+  })
 
-  const clients = data?.data || [];
-  const count = data?.count || 0;
+  const clients = data?.data || []
+  const count = data?.count || 0
 
   const { mutateAsync: onSaveClient } = useMutation({
     mutationFn: async (client: Client): Promise<Client> => {
-        return await ClientIPC.save(client)
+      return await ClientIPC.save(client)
     },
     onSuccess: () => {
       setSearchText('')
       setCurrentPage(1)
-      queryClient.invalidateQueries({ queryKey: ['clients'] });
+      queryClient.invalidateQueries({ queryKey: ['clients'] })
     },
-    onError: (err) => {  
+    onError: (err) => {
       setErrorApp(err)
     }
-  });
-
+  })
 
   const onPageChange = (page: number) => setCurrentPage(page)
 
-
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) =>
     setSearchText(event.target.value)
-
 
   const columns = [
     {
@@ -77,7 +70,7 @@ function Clients() {
     }
   ]
 
-  if (error) return <div>Error: {error.message}</div>;
+  if (error) return <div>Error: {error.message}</div>
 
   return (
     <Container>

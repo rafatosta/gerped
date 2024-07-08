@@ -6,9 +6,12 @@ export interface ServiceAttributes {
   description: string
 }
 
-interface ServiceCreationAttributes extends Optional<ServiceAttributes, 'id'> { }
+interface ServiceCreationAttributes extends Optional<ServiceAttributes, 'id'> {}
 
-class Service extends Model<ServiceAttributes, ServiceCreationAttributes> implements ServiceAttributes {
+class Service
+  extends Model<ServiceAttributes, ServiceCreationAttributes>
+  implements ServiceAttributes
+{
   public id!: number
   public description!: string
 
@@ -26,7 +29,7 @@ Service.init(
     description: {
       type: DataTypes.TEXT,
       allowNull: false
-    },
+    }
   },
   {
     sequelize,

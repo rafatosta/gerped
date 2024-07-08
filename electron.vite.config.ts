@@ -9,7 +9,7 @@ export default defineConfig({
       alias: {
         '@backend': resolve('src/main/sequelize')
       }
-    },
+    }
   },
   preload: {
     plugins: [externalizeDepsPlugin()]
@@ -19,7 +19,7 @@ export default defineConfig({
       alias: {
         '@renderer': resolve('src/renderer/src'),
         '@backend': resolve('src/main/sequelize')
-      },
+      }
     },
     plugins: [react()]
   }

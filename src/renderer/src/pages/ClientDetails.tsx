@@ -47,42 +47,42 @@ function ClientDetails() {
     institute: ''
   } as Client)
 
-
-  const { data: dataOrders } = useQuery<{ data: Order[]; count: number }>(
-    {
-      queryKey: ['clientOrders', id, searchText, currentPage, filterStatus],
-      queryFn: async () => {
-        setError(null);
-        return await OrderIPC.findOrdersByClientId(id ? id : "", searchText, currentPage, filterStatus);
-      }
+  const { data: dataOrders } = useQuery<{ data: Order[]; count: number }>({
+    queryKey: ['clientOrders', id, searchText, currentPage, filterStatus],
+    queryFn: async () => {
+      setError(null)
+      return await OrderIPC.findOrdersByClientId(
+        id ? id : '',
+        searchText,
+        currentPage,
+        filterStatus
+      )
     }
-  );
+  })
 
   // Estado para armazenar a lista de pedidos e total de registros
-  const orders = dataOrders?.data || [];
-  const count = dataOrders?.count || 0;
+  const orders = dataOrders?.data || []
+  const count = dataOrders?.count || 0
 
   // Função para mudar a página atual dos pedidos
   const onPageChange = (page: number) => setCurrentPage(page)
 
   // Função para atualizar o texto de busca na lista de pedidos
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => setSearchText(event.target.value)
-
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) =>
+    setSearchText(event.target.value)
 
   // Efeito para carregar dados do cliente baseado no 'id' da rota
   useEffect(() => {
     if (id) {
-      ClientIPC.findById(id)
-        .then(data => {
-          setClient(data)
-        })
+      ClientIPC.findById(id).then((data) => {
+        setClient(data)
+      })
     }
   }, [id])
 
-
   // Função para atualizar campos do formulário de cliente
   const handleInputChange = (field: keyof Client) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = (field === 'phone') ? e.target.value.replace(/\D/g, '') : e.target.value
+    const value = field === 'phone' ? e.target.value.replace(/\D/g, '') : e.target.value
     setClient({ ...client, [field]: value } as Client)
     setButtonUpEnable(false) // Habilita o botão 'Atualizar'
   }
@@ -130,10 +130,13 @@ function ClientDetails() {
     {
       header: 'Situação',
       accessor: (data: Order) => (
-        <Badge color={data.status === OrderStatus.ATIVO ? 'warning' : 'success'} className="flex justify-center items-center">
+        <Badge
+          color={data.status === OrderStatus.ATIVO ? 'warning' : 'success'}
+          className="flex justify-center items-center"
+        >
           {OrderStatus[data.status]} {/* Exibe o status do pedido com base no enum OrderStatus */}
         </Badge>
-      ),
+      )
     },
     {
       header: 'Ações',
@@ -143,7 +146,7 @@ function ClientDetails() {
         </Link>
       )
     }
-  ];
+  ]
 
   return (
     <Container>
@@ -256,7 +259,9 @@ function ClientDetails() {
           {/* Dropdown para filtrar por status de pedido */}
           <Dropdown color="gray" label={filterStatus ? OrderStatus[filterStatus] : 'TODOS'}>
             <Dropdown.Item onClick={() => setFilterStatus(OrderStatus.ATIVO)}>ATIVO</Dropdown.Item>
-            <Dropdown.Item onClick={() => setFilterStatus(OrderStatus.FINALIZADO)}>FINALIZADO</Dropdown.Item>
+            <Dropdown.Item onClick={() => setFilterStatus(OrderStatus.FINALIZADO)}>
+              FINALIZADO
+            </Dropdown.Item>
             <Dropdown.Item onClick={() => setFilterStatus(OrderStatus.TODOS)}>TODOS</Dropdown.Item>
           </Dropdown>
         </div>
@@ -277,7 +282,6 @@ function ClientDetails() {
         onPageChange={onPageChange}
       />
     </Container>
-
   )
 }
 
