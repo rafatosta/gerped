@@ -97,7 +97,7 @@ function OrderForm() {
             name === 'price'
               ? parseFloat(value)
               : name === 'orderDate' || name === 'deliveryDate'
-                ? new Date(value)
+                ? new Date(value+"T03:00:00.000Z")
                 : value
         }) as Order
     )
