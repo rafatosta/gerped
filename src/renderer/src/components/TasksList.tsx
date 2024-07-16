@@ -2,7 +2,7 @@ import Task from '@backend/models/Task'
 import { FaCheck, FaEye } from 'react-icons/fa'
 import Title from './Title'
 import { Link } from 'react-router-dom'
-import { Button, Popover } from 'flowbite-react'
+import { Popover } from 'flowbite-react'
 
 interface TasksListProps {
   tasks: Task[]
